@@ -8,27 +8,39 @@ classes.
 '''
 
 import cmd
+import sys
+import traceback
+import logging
+
 from PvCmd import PvCmd,PvObj
-import sys, traceback
+from BruKitchen import Spectrometer
 
 class pvshell(cmd.Cmd):
     """ Simple ParaVision command line interface."""
     def __init__(self):
         cmd.Cmd.__init__(self)
         self.pv = PvCmd()
-        self.prompt = str(self.pv.pvScan.GetObj()) + ' > '
         self.do_system('')
+        self.pv.verbose = False
+        self.update_prompt()
+
+    def postcmd(self, stop, line):
+        self.update_prompt()
+        return stop
+
+    def update_prompt(self):
+        self.prompt = str(self.pv.pvScan.GetObj()) + ' > '
 
     def do_system(self, line):
         ''' print info about the current system '''
-        print "Institution:   ", self.pv.GetParam('ACQ_institution')
-        print "System:        ", self.pv.GetParam('ACQ_station')
-        print "PV version:    ", self.pv.GetParam('ACQ_sw_version')
-        print "Status:        ", self.pv.GetParam('ACQ_status')
-        print "Config Status: ", self.pv.GetParam('CONFIG_status_string')
-        print "Shim Status:   ", self.pv.GetParam('CONFIG_shim_status')
-        print "Instrument:    ", self.pv.GetParam('CONFIG_instrument_type')
-        print "Max gradient:  ", self.pv.GetParam('PVM_GradCalConst'), "Hz/mm"
+        print "Institution:   ", self.pv.pvScan.GetParam('ACQ_institution')
+        print "System:        ", self.pv.pvScan.GetParam('ACQ_station')
+        print "PV version:    ", self.pv.pvScan.GetParam('ACQ_sw_version')
+        print "Status:        ", self.pv.pvScan.GetParam('ACQ_status')
+        print "Config Status: ", self.pv.pvScan.GetParam('CONFIG_status_string')
+        print "Shim Status:   ", self.pv.pvScan.GetParam('CONFIG_shim_status')
+        print "Instrument:    ", self.pv.pvScan.GetParam('CONFIG_instrument_type')
+        print "Max gradient:  ", self.pv.pvScan.GetParam('PVM_GradCalConst'), "Hz/mm"
 
     def do_ls(self, line):
         ''' list available scans ? or something '''
@@ -53,10 +65,20 @@ class pvshell(cmd.Cmd):
         print "Reco Image:    ", obj.RECO_image_type
         print "BF1:           ", obj.BF1
         print "RG:            ", obj.RG
+        refAtt = obj.PVM_StudyRefAtt
+        refAtt = refAtt[1]
+        sp = Spectrometer()
+        sp.SetCalibration(1000, refAtt)
+        print "RefAtt         ", sp._cal_dBW, ', Hz/V=',sp._cal_Hz_per_V
 
     def do_pwd(self, line):
         ''' print path of current Scan/Reco '''
         print self.pv.pvScan.ProcPath()
+
+    def do_verbose(self, line):
+        ''' print path of current Scan/Reco '''
+        self.pv.verbose = not self.pv.verbose
+        print 'verbose=',self.pv.verbose
 
     def do_rm(self, line):
         ''' remove a Scan/Reco '''
@@ -86,6 +108,15 @@ class pvshell(cmd.Cmd):
         ''' change currently selected object/scan '''
         self.pv.pvScan.SetObj(line)
     
+    def do_cd(self, line):
+        ''' change currently selected object/scan '''
+        try:
+            num = int(line)
+            # this is short hand for changing to a different experiment in the current study
+            self.pv.pvScan.SetObj(num)
+        except Exception as x:
+            pass
+
     def do_p(self, line):
         ''' print out the value of a parameter in the current obj/scan '''
         try:
@@ -136,6 +167,7 @@ class pvshell(cmd.Cmd):
         self.pv.PVExit()
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.WARN)
     done = False
     pvs = pvshell()
     while not done:

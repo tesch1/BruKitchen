@@ -60,7 +60,7 @@ class PvObj(object):
             raise ValueError("PvObj(): pvScan must be a PvScan object")
         # verify that the objpath is reasonable
         if not os.path.isdir(objpath):
-            raise AttributeError("invalid object path: '{0}'".format(objpath))
+            raise AttributeError("invalid object path: '%s'" % (objpath))
         #if not os.path.isfile(objpath + '/../../acqp'):
         #    print os.path.isdir(objpath),os.path.isfile(objpath + '/../../acqp')
         #    raise AttributeError("invalid object path no acqp: '{0}'".format(objpath))
@@ -83,14 +83,6 @@ class PvObj(object):
             raise NotImplementedError
         return self.GetParam(name)
 
-    def GetParam(self, name):
-        self._pvScan.SetObj(self)
-        return self._pvScan.GetParam(name)
-
-    def SetParam(self, name, value):
-        self._pvScan.SetObj(self)
-        self._pvScan.SetParam(name, value)
-
     def __eq__(self, other):
         if isinstance(other, PvObj):
             return self._objpath == other._objpath
@@ -101,6 +93,14 @@ class PvObj(object):
         if result is NotImplemented:
             return result
         return not result
+
+    def GetParam(self, name):
+        self._pvScan.SetObj(self)
+        return self._pvScan.GetParam(name)
+
+    def SetParam(self, name, value):
+        self._pvScan.SetObj(self)
+        self._pvScan.SetParam(name, value)
 
     def ProcPath(self):
         ''' the path to the object's reconstruction '''
@@ -130,6 +130,12 @@ class PvObj(object):
 
     def RemoveFromList(self):
         self._pvScan.Command('pvDsetObjListRemove', self._objpath)
+        # other options:
+        # pvDsetObjListRemove All
+        # pvDsetObjListRemove Study
+        # pvDsetObjListRemove Subject
+        # pvDsetObjListRemove OtherStudies
+        # pvDsetObjListRemove OtherSubjects
 
     def ExportToTopspin(self):
         self._pvScan.SetObj(self)
@@ -181,7 +187,8 @@ class PvObj(object):
         '''
         like clicking the Traffic Light button in the Scan Control window (i think?)
         '''
-        self._pvScan.Command('pvStartScan', self._objpath)
+        self._pvScan.SetObj(self)
+        self._pvScan.Command('pvStartScan', '-Control', '-Alt')
         self._pvScan.Sync(self._objpath)
 
     def Stop(self):
@@ -217,10 +224,8 @@ class PvObj(object):
         '''
         if what != 'Scan' and what != 'Reco':
             raise ValueError('Undo: what must be Scan or Reco')
-        self._pvScan.Command('pvDsetUndo', what, self._objpath, '-Control', '-Alt')
-        #pvcmd -a pvScan pvDsetUndo Scan Current -Control -Alt
-        #pvcmd -a pvScan pvDsetUndo Scan Current -Control -Alt
-        #pvcmd -a pvScan pvDsetUndo Reco Current -Control -Alt
+        self._pvScan.SetObj(self)
+        self._pvScan.Command('pvDsetUndo', what, 'Current', '-Control', '-Alt')
 
 '''
 how to get a list of all commands supported by all apps:
@@ -233,10 +238,13 @@ class PvApp(object):
     '''
     wrapper around commands that need to have an app
     '''
-    def __init__(self, appname, pv):
-        if not isinstance(pv, PvCmd):
+    def __init__(self, appname, pv=None):
+        if pv != None and not isinstance(pv, PvCmd):
             raise ValueError("PvApp(): pv must be a PvCmd object")
-        self.pv = pv
+        if pv:
+            self.pv = pv
+        else:
+            self.pv = PvCmd()
         self.app = appname
         #self.commands = self.Command('CmdList').split(' ')
 
@@ -268,10 +276,13 @@ class PvApp(object):
         return res
 
     def CommandQuiet(self, *cmd):
-        ''' send command to app, get results '''
+        ''' send command to app, dont get results '''
         res = self.pv._run_pvcmd('-a', self.app, *cmd)
         self.Sync()
         return res
+
+    def CommandList(self):
+        return self.Command('CmdList')
 
 class PvScan(PvApp):
     def __init__(self, pv):
@@ -279,13 +290,13 @@ class PvScan(PvApp):
 
 #    def ExpPath(self):
 #        ''' get full current experiment path '''
-#        return (self.pvScan.GetParam('DU') + '/' +
-#                self.pvScan.GetParam('USER') + '/' +
-#                self.pvScan.GetParam('NAME') + '/' +
-#                self.pvScan.GetParam('EXPNO'))
+#        return (self.GetParam('DU') + '/' +
+#                self.GetParam('USER') + '/' +
+#                self.GetParam('NAME') + '/' +
+#                self.GetParam('EXPNO'))
 
 #    def ProcPath(self):
-#        return self.ExpPath() + '/' + self.pvScan.GetParam('PROCNO')
+#        return self.ExpPath() + '/' + self.GetParam('PROCNO')
 
     def StudyPath(self):
         return self.Command('pvDsetPath', '-path', 'STUDY')
@@ -303,12 +314,30 @@ class PvScan(PvApp):
     def SetObj(self, pvobj):
         ''' set the currently selected object to pvobj '''
         if is_int(pvobj):
-            if os.path.isdir(self.ExpPath() + '/pdata/' + str(pvobj)):
-                self.CommandQuiet('pvDsetSsel', str(pvobj))
+            # just change the EXPNO
+            newdir = self.GetParam('DU') + '/data/' + \
+                     self.GetParam('USER') + '/nmr/' + \
+                     self.GetParam('NAME') + '/' + \
+                     str(pvobj) + '/pdata/1'
+            if os.path.isdir(newdir):
+                pvobj = newdir
+                # TODO: this doesn't work  like this - actually
+                #       it goes to a 0-based index in the scan list(!)
+                #
+                #self.CommandQuiet('pvDsetSsel', str(pvobj))
             else:
-                raise ValueError('PvCmd::SetObj: invalid (empty) prodid:'+str(pvobj))
-        else:
-            self.CommandQuiet('pvDsetObjSel', str(pvobj))
+                raise ValueError('PvCmd::SetObj: invalid (empty) expno:'+str(pvobj))
+        self.CommandQuiet('pvDsetObjSel', str(pvobj))
+
+    # pvDsetSsel New
+    # pvDsetSsel New PROTOCOL LOCATION
+    # pvDsetSsel Ok
+    # pvDsetSsel Cancel
+    # pvDsetSsel default
+    # pvDsetSsel <full path to processed data?>
+    # pvDsetSed -> open method editor
+    # pvDsetPed -> open patient editor
+    # pvDsetYed -> open study editor
 
     def GetObj(self, index=None, restore=True):
         ''' get the currently selected object, or the object at the numerical 'index' '''
@@ -349,6 +378,10 @@ class PvScan(PvApp):
                 break
         self.SetObj(selection)
         return pvobjlist
+    #...?
+    # pvDsetListSubjects
+    # pvDsetListStudies
+    # pvDsetListScans [ByName ById ByPath]
 
     def CreateStudy(self, **kwargs):
         ''' create a new study, return path '''
@@ -374,10 +407,14 @@ class PvScan(PvApp):
         path = self.Command('pvDsetCreateStudy', *args)
         return path
 
+    #def DeleteStudy(self, studyid):
+    #    self.pv.pvDatMan.Command('DMDelete', studyid)
+
     def NewScan(self, protocolLoc, protocolName):
         '''
         create a new scan, using current patient&study and the
         protocol specified by protocolLoc / protocolName
+        pvDsetListLocations
         '''
         self.Command('pvDsetSsel', 'New', protocolLoc, protocolName)
         return self.GetObj()
@@ -385,6 +422,18 @@ class PvScan(PvApp):
     # Reset commands
     # pvcmd -a pvScan pvResetInstrument
     # pvcmd -a pvScan pvResetParameterValues $pv::procnoDir
+
+def floatify(thing):
+    try:
+        f = int(thing)
+        return f
+    except:
+        pass
+    try:
+        f = float(thing)
+        return f
+    except:
+        return thing
 
 class PvCmd(object):
     '''
@@ -396,6 +445,7 @@ class PvCmd(object):
     def __init__(self):
         self._pvcmd = ''
         self._pvapps = dict()
+        self.verbose = False
 
         # find the pvcmd binary
         if 'XWINNMRHOME' in os.environ:
@@ -412,25 +462,17 @@ class PvCmd(object):
             self._pvapps.pop('pvScan', None)
             self._pvapps['pvScan'] = PvScan(self)
         else:
-            print 'pvScan not in running apps:',appnames
-        print "running apps:", self._pvapps.keys()
+            print 'pvScan not in running apps:',self._pvapps.keys()
+        #print "running apps:", self._pvapps.keys()
 
     def __setattr__(self, name, value):
-        if (name not in ['_pvcmd', '_pvapps', 'XWINNMRHOME']
+        if (name not in ['_pvcmd', '_pvapps', 'XWINNMRHOME', 'verbose']
             and not hasattr(self, name)): # would this create a new attribute?
-            raise AttributeError("Creating new attributes {0} is not allowed!".format(name))
+            raise AttributeError("Creating new attribute '%s' is not allowed!" % (name))
         super (PvCmd, self).__setattr__(name, value)
 
     def __getattr__(self, name):
         return self._pvapps[name]
-
-    def GetParam(self, param):
-        ''' '''
-        return self.pvScan.GetParam(param)
-        
-    def SetParam(self, param, value):
-        ''' '''
-        return self.pvScan.SetParam(param, value)
 
     def _run_pvcmd(self, *args):
         try:
@@ -438,11 +480,12 @@ class PvCmd(object):
             cmd += args
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
             res, err = p.communicate()
-            #print 'pvcmd: ', str(cmd[1:-1]), '/', res, '/', err, '/', p.returncode
+            if self.verbose:
+                print 'pvcmd: ', str(cmd[1:]), '/', res, '/', err, '/', p.returncode
             if p.returncode or len(err):
                 #print cmd, p.returncode
                 #print("OS error running pvcmd: {0}".format(err))
-                raise ValueError("Error from pvcmd: {0}".format(err))
+                raise ValueError("Error from pvcmd: %s" % (err))
         except Exception as ex:
             print 'exception:', ex
             print cmd
@@ -450,7 +493,16 @@ class PvCmd(object):
         except ValueError as ex:
             raise ex
         #print res
-        return res.strip()
+        res = res.strip()
+        # if the variable is a list, convert the string into a python list
+        if len(res) and res[0] == '{' and res[-1] == '}':
+            res = res[1:-1]
+            res = eval('['+res+']')
+            # try to convert res to float(s)
+            res = [floatify(x) for x in res]
+        else:
+            res = floatify(res)
+        return res
 
     def runningApps(self):
         appnames = self._run_pvcmd('-l').split()
