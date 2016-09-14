@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+''' emulate behavior of pvcmd for testing purposes '''
+import os
+import sys
+
+dup = os.environ['HOME'] + '/data'
+studyp = dup + '/amt_20160627_mrf5'
+expp = studyp + '/1'
+procp = expp + '/pdata/1'
+quiet = True
+outval = ''
+
+params = {'RG': 10,
+          'Method': 'METHOD',
+          'BF1': 600.522000,
+          'ACQ_institution': 'TUM',
+          'ACQ_station': 'mtmbp',
+          'ACQ_sw_version': 'Test1',
+          'ACQ_status': 'STATUSTEST',
+          'CONFIG_status_string': 'S016',
+          'CONFIG_shim_status': 'unknown',
+          'CONFIG_instrument_type': 'unknown',
+          'PVM_GradCalConst': 124000.0,
+          }
+
+if __name__ == '__main__':
+    argv = sys.argv[1:]
+    if argv[0] == '-l':
+        print 'pvCmd pvScan'
+        exit(0)
+    elif argv[0] == '-s':
+        # sync, just return
+        exit(0)
+    elif argv[0] == '-a':
+        app = argv[1]
+        argv = argv[2:]
+        if argv[0] == '-r':
+            quiet = False
+            argv = argv[1:]
+        cmd = argv[0]
+        argv = argv[1:]
+    elif argv[0] == '-get':
+        cmd = 'GetParam'
+        app = argv[1]
+        argv = argv[2:]
+        quiet = False
+    elif argv[0] == '-set':
+        cmd = 'SetParam'
+        app = argv[1]
+        argv = argv[2:]
+    else:
+        print "unknowncmd"
+        exit(-1)
+
+    if app == 'pvScan':
+        if cmd == 'pvDsetPath':
+            if argv[1] == 'PROCNO':
+                outval = procp
+            elif argv[1] == 'EXPNO':
+                outval = expp
+            elif argv[1] == 'STUDY':
+                outval = studyp
+            else:
+                print 'UNKNOWNPATH',argv
+        elif cmd == 'GetParam':
+            outval = params[argv[0]]
+        else:
+            print 'UNKNOWNPVSCANCMD',argv
+    else:
+        print "UNKNOWNAPP",app
+
+    print outval

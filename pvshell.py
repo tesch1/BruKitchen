@@ -1,0 +1,148 @@
+#!/usr/bin/env python
+'''
+command line interface for paravision, or actually the PvCmd and PvObj
+classes.
+
+(c) Copyright 2016, Michael Tesch, tesch1@gmail.com
+
+'''
+
+import cmd
+from PvCmd import PvCmd,PvObj
+import sys, traceback
+
+class pvshell(cmd.Cmd):
+    """ Simple ParaVision command line interface."""
+    def __init__(self):
+        cmd.Cmd.__init__(self)
+        self.pv = PvCmd()
+        self.prompt = str(self.pv.pvScan.GetObj()) + ' > '
+        self.do_system('')
+
+    def do_system(self, line):
+        ''' print info about the current system '''
+        print "Institution:   ", self.pv.GetParam('ACQ_institution')
+        print "System:        ", self.pv.GetParam('ACQ_station')
+        print "PV version:    ", self.pv.GetParam('ACQ_sw_version')
+        print "Status:        ", self.pv.GetParam('ACQ_status')
+        print "Config Status: ", self.pv.GetParam('CONFIG_status_string')
+        print "Shim Status:   ", self.pv.GetParam('CONFIG_shim_status')
+        print "Instrument:    ", self.pv.GetParam('CONFIG_instrument_type')
+        print "Max gradient:  ", self.pv.GetParam('PVM_GradCalConst'), "Hz/mm"
+
+    def do_ls(self, line):
+        ''' list available scans ? or something '''
+        objs = self.pv.pvScan.GetObjList()
+        for iobj in objs:
+            print " ".join(str(x) for x in iobj)
+
+    def do_man(self, line):
+        ''' get info about available commands '''
+        if not len(line):
+            # list all commands
+            print self.pv.pvScan.Command('CmdList')
+        else:
+            pass
+
+    def do_info(self, line):
+        ''' print some info about the current scan '''
+        obj = self.pv.pvScan.GetObj()
+        print "Scan Method:   ", obj.Method
+        print "Scan Completed:", obj.ACQ_completed
+        print "Scan Duration: ", obj.PVM_ScanTimeStr
+        print "Reco Image:    ", obj.RECO_image_type
+        print "BF1:           ", obj.BF1
+        print "RG:            ", obj.RG
+
+    def do_pwd(self, line):
+        ''' print path of current Scan/Reco '''
+        print self.pv.pvScan.ProcPath()
+
+    def do_rm(self, line):
+        ''' remove a Scan/Reco '''
+        obj = self.pv.pvScan.GetObj()
+        print 'deleting ', obj
+        obj.Delete()
+    
+    def do_study(self, line):
+        ''' print current or create a new study
+
+        field: subjectid, studyname, studyloc, name, weight=10.0
+        '''
+        if len(line):
+            self.pv.pvScan.CreateStudy(*line.split(' '))
+        else:
+            print self.pv.pvScan.StudyPath()
+    
+    def do_clone(self, line):
+        ''' clone the current object/scan '''
+        self.pv.pvScan.GetObj().Clone()
+    
+    def do_export(self, line):
+        ''' export the current object/scan to Topspin '''
+        self.pv.pvScan.GetObj().ExportToTopspin()
+    
+    def do_sel(self, line):
+        ''' change currently selected object/scan '''
+        self.pv.pvScan.SetObj(line)
+    
+    def do_p(self, line):
+        ''' print out the value of a parameter in the current obj/scan '''
+        try:
+            print line, '=', self.pv.pvScan.GetObj().__getattr__(line)
+        except ValueError as ex:
+            print "'", line, "' not set."
+
+    def do_set(self, line):
+        ''' set the value of a parameter in the current obj/scan '''
+        try:
+            lines = line.split(" ")
+            self.pv.pvScan.GetObj().__setattr__(lines[0], " ".join(lines[1:]))
+        except ValueError as ex:
+            print "'", line, "' not set:", ex
+
+    def do_start(self, line):
+        ''' traffic light (?) '''
+        self.pv.pvScan.GetObj().Start()
+
+    def do_stop(self, line):
+        ''' traffic light stop (?) '''
+        self.pv.pvScan.GetObj().Stop()
+
+    def do_undo(self, line):
+        ''' undo a "Scan" or a "Reco" '''
+        if len(line):
+            self.pv.pvScan.GetObj().Undo(line)
+        else:
+            self.pv.pvScan.GetObj().Undo()
+
+    def do_gop(self, line):
+        ''' GOP '''
+        self.pv.pvScan.GetObj().Gop()
+
+    def do_gsp(self, line):
+        ''' GSP '''
+        self.pv.pvScan.GetObj().Gsp()
+    
+    def do_EOF(self, line):
+        return True
+
+    def do_quit(self, arg):
+        ''' quit '''
+        sys.exit(1)
+
+    def do_kill(self, arg):
+        ''' quit ParaVision '''
+        self.pv.PVExit()
+
+if __name__ == '__main__':
+    done = False
+    pvs = pvshell()
+    while not done:
+        try:
+            pvs.cmdloop()
+        except (SystemExit, KeyboardInterrupt):
+            print
+            done = True
+        except:
+            print traceback.print_exc()
