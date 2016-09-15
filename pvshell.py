@@ -60,13 +60,13 @@ class pvshell(cmd.Cmd):
         ''' print some info about the current scan '''
         obj = self.pv.pvScan.GetObj()
         print "Scan Method:   ", obj.Method
+        print "Scan Name:     ", obj.ACQ_scan_name
         print "Scan Completed:", obj.ACQ_completed
         print "Scan Duration: ", obj.PVM_ScanTimeStr
         print "Reco Image:    ", obj.RECO_image_type
         print "BF1:           ", obj.BF1
         print "RG:            ", obj.RG
-        refAtt = obj.PVM_StudyRefAtt
-        refAtt = refAtt[1]
+        refAtt = obj.PVM_RefAttCh1
         sp = Spectrometer()
         sp.SetCalibration(1000, refAtt)
         print "RefAtt         ", sp._cal_dBW, ', Hz/V=',sp._cal_Hz_per_V
