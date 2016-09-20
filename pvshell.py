@@ -16,6 +16,7 @@ from PvCmd import PvCmd,PvObj
 from BruKitchen import Spectrometer
 
 class pvshell(cmd.Cmd):
+    geompars = ['PVM_VoxArrSize', 'PVM_VoxArrPosition', 'PVM_VoxExcOrder', 'PVM_VoxArrCSDisplacement']
     """ Simple ParaVision command line interface."""
     def __init__(self):
         cmd.Cmd.__init__(self)
@@ -23,6 +24,7 @@ class pvshell(cmd.Cmd):
         self.do_system('')
         self.pv.verbose = False
         self.update_prompt()
+        self.geom = {}
 
     def postcmd(self, stop, line):
         self.update_prompt()
@@ -60,6 +62,7 @@ class pvshell(cmd.Cmd):
         ''' print some info about the current scan '''
         obj = self.pv.pvScan.GetObj()
         print "Scan Method:   ", obj.Method
+        print "Scan Name:     ", obj.ACQ_scan_name
         print "Scan Completed:", obj.ACQ_completed
         print "Scan Duration: ", obj.PVM_ScanTimeStr
         print "Reco Image:    ", obj.RECO_image_type
@@ -153,6 +156,23 @@ class pvshell(cmd.Cmd):
     def do_gsp(self, line):
         ''' GSP '''
         self.pv.pvScan.GetObj().Gsp()
+
+    def do_getgeom(self, line):
+        ''' get the current geometry, store in geom clipboard '''
+        obj = self.pv.pvScan.GetObj()
+        for pname in self.geompars:
+            self.geom[pname] = obj.GetParam(pname)
+            print pname,'=',self.geom[pname]
+
+    def do_setgeom(self, line):
+        ''' set the geometry of the current scan to that stored in the geom clipboard '''
+        if not self.geom:
+            print 'must run "getgeom" before "setgeom"'
+            return
+        obj = self.pv.pvScan.GetObj()
+        for pname in self.geom.keys():
+            print 'setting',pname,'=',self.geom[pname]
+            obj.SetParam(pname, self.geom[pname])
     
     def do_EOF(self, line):
         return True
