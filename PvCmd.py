@@ -227,12 +227,34 @@ class PvObj(object):
         self._pvScan.SetObj(self)
         self._pvScan.Command('pvDsetUndo', what, 'Current', '-Control', '-Alt')
 
+# side note:
 '''
 how to get a list of all commands supported by all apps:
 
 for s in `pvcmd -l` ; do echo "-- $s --"; pvcmd -a $s -r CmdList ; echo '' ;  done
 
 '''
+
+def floatify(thing):
+    ''' take a pvcmd string 'thing' and turn it into a representitive python object '''
+    try:
+        s = thing
+        return int(float(s)) if int(float(s)) == float(s) else float(s)
+    except:
+        return thing
+
+def pythify(val):
+    ''' take a pvcmd string 'val' and turn it into a representitive python object '''
+    # if the variable is a list, convert the string into a python list
+    if len(val) and val[0] == '{' and val[-1] == '}':
+        val = val[1:-1]
+        val = pythify(val.strip())
+        val = eval('[' + str(val) + ']')
+        # try to convert val to float(s)
+        val = [floatify(x) for x in val]
+    else:
+        val = floatify(val)
+    return val
 
 class PvApp(object):
     '''
@@ -251,6 +273,7 @@ class PvApp(object):
     def GetParam(self, param):
         ''' '''
         val = self.pv._run_pvcmd('-get', self.app, param)
+        val = pythify(val)
         return val
         
     def SetParam(self, param, value):
@@ -423,18 +446,6 @@ class PvScan(PvApp):
     # pvcmd -a pvScan pvResetInstrument
     # pvcmd -a pvScan pvResetParameterValues $pv::procnoDir
 
-def floatify(thing):
-    try:
-        f = int(thing)
-        return f
-    except:
-        pass
-    try:
-        f = float(thing)
-        return f
-    except:
-        return thing
-
 class PvCmd(object):
     '''
     class for interacting with the whole ParaVision suite via the "pvcmd" utility
@@ -493,16 +504,7 @@ class PvCmd(object):
         except ValueError as ex:
             raise ex
         #print res
-        res = res.strip()
-        # if the variable is a list, convert the string into a python list
-        if len(res) and res[0] == '{' and res[-1] == '}':
-            res = res[1:-1]
-            res = eval('['+res+']')
-            # try to convert res to float(s)
-            res = [floatify(x) for x in res]
-        else:
-            res = floatify(res)
-        return res
+        return res.strip()
 
     def runningApps(self):
         appnames = self._run_pvcmd('-l').split()
