@@ -65,8 +65,7 @@ class pvshell(cmd.Cmd):
         print "Reco Image:    ", obj.RECO_image_type
         print "BF1:           ", obj.BF1
         print "RG:            ", obj.RG
-        refAtt = obj.PVM_StudyRefAtt
-        refAtt = refAtt[1]
+        refAtt = obj.PVM_RefAttCh1
         sp = Spectrometer()
         sp.SetCalibration(1000, refAtt)
         print "RefAtt         ", sp._cal_dBW, ', Hz/V=',sp._cal_Hz_per_V
