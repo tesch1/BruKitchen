@@ -2,8 +2,8 @@
 // 
 // JCAMP-DX c++ mex wrapper
 // 
-// Macos: mex mexldr.cpp jcampdx.cpp jcamp_parse.cpp jcamp_scan.cpp fileloc.cpp
-// Linux: mex mexldr.cpp jcampdx.cpp jcamp_parse.cpp jcamp_scan.cpp fileloc.cpp CXXFLAGS="-std=c++14 -fPIC"
+// Macos: mex mexldr.cpp jcampdx.cpp jcamp_parse.cpp jcamp_scan.cpp FileLoc.cpp
+// Linux: mex mexldr.cpp jcampdx.cpp jcamp_parse.cpp jcamp_scan.cpp FileLoc.cpp CXXFLAGS="-std=c++14 -fPIC"
 //
 // (c)2016 Michael Tesch, tesch1@gmail.com
 //

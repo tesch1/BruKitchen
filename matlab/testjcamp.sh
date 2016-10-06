@@ -6,10 +6,10 @@ good=0
 export XWINNMRHOME=/opt/topspin
 export XWINNMRHOME=${HOME}/src/pv51
 
-#jdxs="$XWINNMRHOME/exp/stan/nmr/lists/wave/* $XWINNMRHOME/exp/stan/nmr/lists/gp/* $XWINNMRHOME/exp/stan/nmr/parx/template/general/S019/*/*"
-#jdxs=`find $HOME/src/od1n-code/trunk/odin -name *.smp`
+jdxs="$XWINNMRHOME/exp/stan/nmr/lists/wave/* $XWINNMRHOME/exp/stan/nmr/lists/gp/* $XWINNMRHOME/exp/stan/nmr/parx/template/general/S019/*/*"
 #jdxs=$XWINNMRHOME/exp/stan/nmr/parx/template/general/S019/*/*
-jdxs=$XWINNMRHOME/exp/stan/nmr/par/*/*
+#jdxs=$XWINNMRHOME/exp/stan/nmr/par/*/*
+#jdxs=$(find $HOME/src/od1n-code/trunk/odin -name *.smp)
 
 export DEBUG=1
 unset DEBUG
