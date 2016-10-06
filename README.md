@@ -24,7 +24,7 @@ ans =
         5000
 ```
 
-|File                  |                                              |
+|Files                 |                                              |
 |----------------------|----------------------------------------------|
 |read_bru_experiment.m |Read all the files and data from an experiment|
 |mexldr.cpp            |Read a single jcamp-dx parameter file         |
@@ -33,3 +33,6 @@ ans =
 |File                  |                                                  |
 |----------------------|--------------------------------------------------|
 |BruKitchen.py         |utility functions for controlling the spectrometer|
+|PvCmd.py              |classes for wrapping control of ParaVision        |
+|pvshell.py            |a command-line shell for controlling ParaVision   |
+|procall.py            |example of how to process a series of PV experiments|
