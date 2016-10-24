@@ -39,6 +39,7 @@
 enum record_type {
   RECORD_TEXT,
   RECORD_STRING,
+  RECORD_QSTRING,
   RECORD_NUMERIC,
   RECORD_GROUP,
   RECORD_UNSET,
@@ -49,7 +50,7 @@ class Ldr;
 class Record {
 public:
   Record();
-  Record(std::string str);
+  Record(std::string str, bool quoted = false);
   Record(double val);
   Record(Ldr * ldr);
 
@@ -57,7 +58,7 @@ public:
   const std::string & str() const;
   record_type type() const;
   void setNum(double val);
-  void setStr(std::string str);
+  void setStr(std::string str, bool quoted = false);
   const Ldr & group() const;
   void setType(record_type type);
 
@@ -97,7 +98,7 @@ public:
   void setShape(std::string variable_list);
   void setShape(const Ldr & shape);
 
-  void appendStr(std::string str);
+  void appendStr(std::string str, bool quoted = false);
   void appendNum(double val);
   void appendGroup(Ldr * group);
 
@@ -121,7 +122,7 @@ public:
   ~Ldrset();
 
   void loadFile(const std::string filename);
-  void loadString(const std::string jdxstring, std::string nametag="string");
+  void loadString(const std::string jdxstring);
   void clear();
   size_t size() const;
 

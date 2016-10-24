@@ -1,5 +1,5 @@
 #line 2 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.cpp"
-#line 18 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 19 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 #ifdef _WIN32
 #include <io.h>
 #endif
@@ -424,10 +424,10 @@ struct yy_trans_info
 static yyconst flex_int16_t yy_accept[109] =
     {   0,
         0,    0,    0,    0,   21,   19,   18,   18,   19,   19,
-       15,   14,   19,   16,   19,    6,   17,   19,    7,   19,
-       18,   19,   19,   14,   19,   16,   19,    6,   17,    7,
-        0,    0,    0,    0,    0,    6,    6,    6,    7,    7,
-        0,    8,   13,   13,   13,    6,    6,    6,    7,    7,
+       15,   14,   19,   16,   19,    6,   17,   19,    8,   19,
+       18,   19,   19,   14,   19,   16,   19,    6,   17,    8,
+        0,    0,    0,    0,    0,    6,    6,    6,    8,    8,
+        0,    7,   13,   13,   13,    6,    6,    6,    8,    8,
         0,    0,    0,    0,    0,    1,    1,    0,    0,    0,
         0,    0,    6,   13,   13,   13,    6,    0,    0,    5,
         0,    0,    0,    0,    0,    0,    0,    6,    6,    5,
@@ -591,7 +591,7 @@ static yyconst flex_int16_t yy_chk[313] =
 /* Table of booleans, true if rule could match eol. */
 static yyconst flex_int32_t yy_rule_can_match_eol[21] =
     {   0,
-1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 
+1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 
     0,     };
 
 /* The intent behind this definition is that it'll catch
@@ -602,7 +602,8 @@ static yyconst flex_int32_t yy_rule_can_match_eol[21] =
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
-/* -*-c-*-
+/* -*-  Mode: C++; c-basic-offset: 2 -*- */
+/*
  * (c) 2016 Michael Tesch (tesch1@gmail.com)
  * 
  */
@@ -614,7 +615,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[21] =
 
 /* special lex-modes */
 
-#line 52 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 53 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 
   char * makelabel(char * match)
   {
@@ -637,7 +638,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[21] =
     return label;
   }
 
-  /* stupid jcamp */
+  /* stupid jcamp: these are special labels that are followed by TXT type */
   int istextlabel(char * text)
   {
     const char * tlabels[] = {"TITLE", "DATATYPE", "ORIGIN", "OWNER", NULL };
@@ -656,18 +657,11 @@ static yyconst flex_int32_t yy_rule_can_match_eol[21] =
   }
 
 #define YY_USER_ACTION do {                                             \
-    yylloc->first_line = yylloc->last_line;                             \
-    yylloc->first_column = yylloc->last_column;                         \
+    yylloc->first_line = yylloc->last_line = jcamp_yyget_lineno(yyscanner);   \
+    yylloc->first_column = jcamp_yyget_column(yyscanner);                     \
+    yylloc->last_column = yylloc->first_column + jcamp_yyget_leng(yyscanner)-1; \
     yylloc->rawtext = jcamp_yyget_text(yyscanner);                            \
-    for (size_t ii = 0; ii < yylloc->rawtext.size(); ii++) {            \
-      if (yylloc->rawtext.at(ii) == '\n') {                             \
-        yylloc->last_line++;                                            \
-        yylloc->last_column = 0;                                        \
-      }                                                                 \
-      else {                                                            \
-        yylloc->last_column++;                                          \
-      }                                                                 \
-    }                                                                   \
+    jcamp_yyset_column(yylloc->last_column + 1,yyscanner);                   \
     yylloc->filename = jdx._curfilename;                                \
     /*std::cerr << ">" << yytext << "<";*/                              \
   } while(0);
@@ -680,7 +674,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[21] =
 /*%option noinput*/
 /* "("[XY]+\.\.[XY]+")"[\n\r]      { CC; return VAR_LIST; } */
 /*.                               { CC; unput(yytext[0]); BEGIN(INITIAL); return ASDF; } */
-#line 684 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.cpp"
+#line 678 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.cpp"
 
 #define INITIAL 0
 #define TXT 1
@@ -964,11 +958,11 @@ YY_DECL
 		}
 
 	{
-#line 130 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 124 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 
 
  /* rules */
-#line 972 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.cpp"
+#line 966 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1040,7 +1034,7 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 133 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 127 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; }
 	YY_BREAK
 case 2:
@@ -1050,94 +1044,94 @@ YY_LINENO_REWIND_TO(yy_cp - 2);
 yyg->yy_c_buf_p = yy_cp -= 2;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-#line 134 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 128 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 135 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 129 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { BEGIN(TXT); return TITLE; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 136 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 130 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; return END; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 137 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 131 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { if (istextlabel(yytext)) BEGIN(TXT); yylval->str = makelabel(yytext); return LABEL; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 139 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 133 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; yylval->num = data(yytext); return AFFN; }
 	YY_BREAK
 case 7:
+/* rule 7 can match eol */
 YY_RULE_SETUP
-#line 140 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
-{ CC; yylval->str = strdup(yytext); return STRING; }
+#line 134 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+{ CC; yylval->str = strndup(&yytext[1], strlen(yytext) - 1); return QSTRING; }
 	YY_BREAK
 case 8:
-/* rule 8 can match eol */
 YY_RULE_SETUP
-#line 141 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 135 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; yylval->str = strdup(yytext); return STRING; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 142 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 136 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; yylval->str = strdup(yytext); return VAR_LIST; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 143 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 137 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; yylval->str = strdup(yytext); return VAR_LIST; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 144 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 138 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; yylval->str = strdup(yytext); return VAR_LIST; /* apparently a typo? */ }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 145 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 139 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; yylval->str = strdup(yytext); return VAR_LIST; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 147 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 141 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; yylval->str = strdup(yytext); return TEXT; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 149 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 143 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; return ')'; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 150 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 144 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; return '('; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 151 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 145 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 152 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 146 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; }
 	YY_BREAK
 case 18:
 /* rule 18 can match eol */
 YY_RULE_SETUP
-#line 153 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 147 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; /* eat whitespace */ }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 154 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 148 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 {
   /* get some of the next chars for err msg context */
   char msg[128];
@@ -1155,10 +1149,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 169 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 163 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1162 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.cpp"
+#line 1156 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(TXT):
 	yyterminate();
@@ -2321,7 +2315,7 @@ void jcamp_yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 169 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 163 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 
 
 

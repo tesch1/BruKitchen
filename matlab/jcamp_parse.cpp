@@ -132,12 +132,13 @@ extern int jcamp_yydebug;
   {
     LABEL = 258,
     STRING = 259,
-    TEXT = 260,
-    ASDF = 261,
-    AFFN = 262,
-    TITLE = 263,
-    END = 264,
-    VAR_LIST = 265
+    QSTRING = 260,
+    TEXT = 261,
+    ASDF = 262,
+    AFFN = 263,
+    TITLE = 264,
+    END = 265,
+    VAR_LIST = 266
   };
 #endif
 
@@ -153,7 +154,7 @@ union YYSTYPE
   char * str;
   double num;
 
-#line 157 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:355  */
+#line 158 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -183,7 +184,7 @@ int jcamp_yyparse (Ldrset & jdx, yyscan_t scanner);
 
 /* Copy the second part of user declarations.  */
 
-#line 187 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:358  */
+#line 188 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -425,23 +426,23 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  12
+#define YYFINAL  13
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   41
+#define YYLAST   46
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  13
+#define YYNTOKENS  14
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  10
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  23
+#define YYNRULES  25
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  33
+#define YYNSTATES  35
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   265
+#define YYMAXUTOK   266
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -454,7 +455,7 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      11,    12,     2,     2,     2,     2,     2,     2,     2,     2,
+      12,    13,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -476,7 +477,7 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10
+       5,     6,     7,     8,     9,    10,    11
 };
 
 #if YYDEBUG
@@ -485,7 +486,7 @@ static const yytype_uint8 yyrline[] =
 {
        0,    62,    62,    66,    67,    71,    76,    84,    85,    86,
       87,    91,    97,   107,   112,   120,   124,   125,   126,   127,
-     131,   132,   136,   137
+     128,   132,   133,   137,   138,   139
 };
 #endif
 
@@ -494,10 +495,10 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "LABEL", "STRING", "TEXT", "ASDF",
-  "AFFN", "TITLE", "END", "VAR_LIST", "'('", "')'", "$accept", "toplevel",
-  "blocks", "block", "ldrs", "ldr", "data_group_p", "data_set", "nvalue",
-  "svalue", YY_NULLPTR
+  "$end", "error", "$undefined", "LABEL", "STRING", "QSTRING", "TEXT",
+  "ASDF", "AFFN", "TITLE", "END", "VAR_LIST", "'('", "')'", "$accept",
+  "toplevel", "blocks", "block", "ldrs", "ldr", "data_group_p", "data_set",
+  "nvalue", "svalue", YY_NULLPTR
 };
 #endif
 
@@ -507,14 +508,14 @@ static const char *const yytname[] =
 static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,    40,    41
+     265,   266,    40,    41
 };
 # endif
 
-#define YYPACT_NINF -9
+#define YYPACT_NINF -13
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-9)))
+  (!!((Yystate) == (-13)))
 
 #define YYTABLE_NINF -1
 
@@ -525,10 +526,10 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -6,    30,     4,    -6,    -9,    10,    -9,    -9,    -9,    21,
-      -9,     3,    -9,    -9,    -9,    -9,    -9,    -9,    12,    -9,
-      -9,    -9,    23,    12,     1,    12,    -9,    -9,    -9,    -9,
-      -9,    -9,    -9
+      -7,    32,     7,    -7,   -13,    33,   -13,   -13,   -13,   -13,
+      21,   -13,    37,   -13,   -13,   -13,   -13,   -13,   -13,    14,
+     -13,   -13,   -13,    24,    14,     4,    14,   -13,   -13,   -13,
+     -13,   -13,   -13,   -13,   -13
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -536,22 +537,22 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     2,     4,    19,    22,    23,    10,     0,
-       9,     0,     1,     3,    14,    19,    19,    19,    13,     6,
-       8,     7,     0,    11,     0,    12,    16,    20,    21,    18,
-      17,     5,    15
+       0,     0,     0,     2,     4,    20,    23,    24,    25,    10,
+       0,     9,     0,     1,     3,    14,    20,    20,    20,    13,
+       6,     8,     7,     0,    11,     0,    12,    16,    17,    21,
+      22,    19,    18,     5,    15
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -9,    -9,    -9,     0,    -1,    -8,    20,    24,    -9,    -9
+     -13,   -13,   -13,     0,     1,    -9,    10,   -12,   -13,   -13
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,     3,     8,     9,    10,    29,    18,    30,    11
+      -1,     2,     3,     9,    10,    11,    31,    19,    32,    12
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -559,46 +560,46 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-       4,    21,     1,    13,    12,    26,     5,    27,    28,    20,
-      22,     1,    16,    32,    21,    14,    26,     0,    27,    28,
-      15,    16,    20,    16,     5,    17,     5,     0,     0,     1,
-      19,     1,    31,     5,     6,     7,     0,     0,     1,    23,
-      24,    25
+       4,    22,     1,    14,    24,    25,    26,    13,    27,    28,
+      21,    29,    30,    23,    22,    18,    17,    34,    27,    28,
+       0,    29,    30,    21,     5,     0,    17,     5,     0,     0,
+       1,    20,     0,     1,    33,     5,     6,     7,     8,    15,
+       5,     1,     0,     0,    16,    17,     1
 };
 
 static const yytype_int8 yycheck[] =
 {
-       0,     9,     8,     3,     0,     4,     3,     6,     7,     9,
-      11,     8,    11,    12,    22,     5,     4,    -1,     6,     7,
-      10,    11,    22,    11,     3,     5,     3,    -1,    -1,     8,
-       9,     8,     9,     3,     4,     5,    -1,    -1,     8,    15,
-      16,    17
+       0,    10,     9,     3,    16,    17,    18,     0,     4,     5,
+      10,     7,     8,    12,    23,     5,    12,    13,     4,     5,
+      -1,     7,     8,    23,     3,    -1,    12,     3,    -1,    -1,
+       9,    10,    -1,     9,    10,     3,     4,     5,     6,     6,
+       3,     9,    -1,    -1,    11,    12,     9
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     8,    14,    15,    16,     3,     4,     5,    16,    17,
-      18,    22,     0,    16,     5,    10,    11,    19,    20,     9,
-      16,    18,    17,    20,    20,    20,     4,     6,     7,    19,
-      21,     9,    12
+       0,     9,    15,    16,    17,     3,     4,     5,     6,    17,
+      18,    19,    23,     0,    17,     6,    11,    12,    20,    21,
+      10,    17,    19,    18,    21,    21,    21,     4,     5,     7,
+       8,    20,    22,    10,    13
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    13,    14,    15,    15,    16,    16,    17,    17,    17,
-      17,    18,    18,    18,    18,    19,    20,    20,    20,    20,
-      21,    21,    22,    22
+       0,    14,    15,    16,    16,    17,    17,    18,    18,    18,
+      18,    19,    19,    19,    19,    20,    21,    21,    21,    21,
+      21,    22,    22,    23,    23,    23
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     1,     2,     1,     4,     3,     2,     2,     1,
-       1,     3,     3,     2,     2,     3,     2,     2,     2,     0,
-       1,     1,     1,     1
+       1,     3,     3,     2,     2,     3,     2,     2,     2,     2,
+       0,     1,     1,     1,     1,     1
 };
 
 
@@ -1094,10 +1095,10 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocatio
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   switch (yytype)
     {
-          case 16: /* block  */
+          case 17: /* block  */
 #line 55 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1257  */
       { delete ((*yyvaluep).block); }
-#line 1101 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1257  */
+#line 1102 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1257  */
         break;
 
 
@@ -1391,19 +1392,19 @@ yyreduce:
         case 2:
 #line 62 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
     { jdx.jcamp_topnode = (yyval.block) = (yyvsp[0].block); }
-#line 1395 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1396 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 3:
 #line 66 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
     { (yyval.block) = (yyvsp[-1].block); (yyval.block)->addBlock((yyvsp[0].block)); }
-#line 1401 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1402 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
 #line 67 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
     { (yyval.block) = (yyvsp[0].block); }
-#line 1407 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1408 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 5:
@@ -1412,7 +1413,7 @@ yyreduce:
           (yyval.block) = (yyvsp[-1].block);
           (yyval.block)->addLdr("TITLE", Ldr(RECORD_STRING, (yyvsp[-2].str)));
         }
-#line 1416 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1417 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
@@ -1421,31 +1422,31 @@ yyreduce:
           (yyval.block) = (yyvsp[-1].block);
           (yyval.block)->addLdr("TITLE", Ldr());
         }
-#line 1425 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1426 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 7:
 #line 84 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
     { (yyval.block) = (yyvsp[-1].block); (yyval.block)->addLdr(*(yyvsp[0].ldr)); }
-#line 1431 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1432 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 8:
 #line 85 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
     { (yyval.block) = (yyvsp[-1].block); (yyval.block)->addBlock((yyvsp[0].block)); }
-#line 1437 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1438 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 9:
 #line 86 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
     { (yyval.block) = new Ldrset(); (yyval.block)->addLdr(*(yyvsp[0].ldr)); }
-#line 1443 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1444 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 10:
 #line 87 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
     { (yyval.block) = new Ldrset(); (yyval.block)->addBlock((yyvsp[0].block)); }
-#line 1449 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1450 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 11:
@@ -1455,7 +1456,7 @@ yyreduce:
           (yyval.ldr)->setLabel((yyvsp[-2].str));
           (yyval.ldr)->setShape((yyvsp[-1].str));
         }
-#line 1459 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1460 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 12:
@@ -1469,7 +1470,7 @@ yyreduce:
           }
           (yyval.ldr)->setLabel((yyvsp[-2].str));
         }
-#line 1473 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1474 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 13:
@@ -1478,7 +1479,7 @@ yyreduce:
           (yyval.ldr) = (yyvsp[0].ldr);
           (yyval.ldr)->setLabel((yyvsp[-1].str));
         }
-#line 1482 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1483 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 14:
@@ -1487,65 +1488,77 @@ yyreduce:
           (yyval.ldr) = new Ldr(RECORD_TEXT, (yyvsp[0].str));
           (yyval.ldr)->setLabel((yyvsp[-1].str));
         }
-#line 1491 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1492 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 15:
 #line 120 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
     { (yyval.ldr) = (yyvsp[-1].ldr); }
-#line 1497 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1498 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 16:
 #line 124 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
     { (yyval.ldr) = (yyvsp[-1].ldr); (yyval.ldr)->appendStr((yyvsp[0].str)); }
-#line 1503 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1504 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 17:
 #line 125 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
-    { (yyval.ldr) = (yyvsp[-1].ldr); (yyval.ldr)->appendNum((yyvsp[0].num)); }
-#line 1509 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+    { (yyval.ldr) = (yyvsp[-1].ldr); (yyval.ldr)->appendStr((yyvsp[0].str), true); }
+#line 1510 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 18:
 #line 126 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
-    { (yyval.ldr) = (yyvsp[-1].ldr); (yyval.ldr)->appendGroup((yyvsp[0].ldr)); }
-#line 1515 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+    { (yyval.ldr) = (yyvsp[-1].ldr); (yyval.ldr)->appendNum((yyvsp[0].num)); }
+#line 1516 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 19:
 #line 127 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
-    { (yyval.ldr) = new Ldr(); }
-#line 1521 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+    { (yyval.ldr) = (yyvsp[-1].ldr); (yyval.ldr)->appendGroup((yyvsp[0].ldr)); }
+#line 1522 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 131 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
-    { (yyval.num) = (yyvsp[0].num); }
-#line 1527 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 128 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+    { (yyval.ldr) = new Ldr(); }
+#line 1528 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 21:
 #line 132 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
     { (yyval.num) = (yyvsp[0].num); }
-#line 1533 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1534 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 136 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
-    { (yyval.str) = (yyvsp[0].str); }
-#line 1539 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 133 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+    { (yyval.num) = (yyvsp[0].num); }
+#line 1540 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 23:
 #line 137 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
     { (yyval.str) = (yyvsp[0].str); }
-#line 1545 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1546 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+    break;
+
+  case 24:
+#line 138 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+    { (yyval.str) = (yyvsp[0].str); }
+#line 1552 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+    break;
+
+  case 25:
+#line 139 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+    { (yyval.str) = (yyvsp[0].str); }
+#line 1558 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1549 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1562 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1780,7 +1793,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 140 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1906  */
+#line 142 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1906  */
 
 
 void jcamp_yyerror(_YYLTYPE * yylloc, Ldrset & , yyscan_t , const char *s)

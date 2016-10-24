@@ -47,12 +47,13 @@ extern int jcamp_yydebug;
   {
     LABEL = 258,
     STRING = 259,
-    TEXT = 260,
-    ASDF = 261,
-    AFFN = 262,
-    TITLE = 263,
-    END = 264,
-    VAR_LIST = 265
+    QSTRING = 260,
+    TEXT = 261,
+    ASDF = 262,
+    AFFN = 263,
+    TITLE = 264,
+    END = 265,
+    VAR_LIST = 266
   };
 #endif
 
@@ -68,7 +69,7 @@ union YYSTYPE
   char * str;
   double num;
 
-#line 72 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.hpp" /* yacc.c:1909  */
+#line 73 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

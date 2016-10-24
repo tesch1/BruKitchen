@@ -3,7 +3,7 @@
 #define jcamp_yyIN_HEADER 1
 
 #line 6 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.hpp"
-#line 18 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 19 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 #ifdef _WIN32
 #include <io.h>
 #endif
@@ -387,7 +387,7 @@ extern int jcamp_yylex \
 #undef YY_DECL
 #endif
 
-#line 169 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 163 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 
 
 #line 394 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.hpp"

@@ -37,6 +37,9 @@ operator <<(std::ostream & out, Record const & rr)
   case RECORD_STRING:
     out << rr._str;
     break;
+  case RECORD_QSTRING:
+    out << "<" << rr._str << ">";
+    break;
   case RECORD_NUMERIC:
     out << rr._num;
     break;
@@ -93,8 +96,8 @@ Record::Record()
 {
 }
 
-Record::Record(std::string str)
-  : _type(RECORD_STRING), _str(str), _num(0), _ldr(NULL)
+Record::Record(std::string str, bool quoted)
+  : _type(quoted ? RECORD_QSTRING : RECORD_STRING), _str(str), _num(0), _ldr(NULL)
 {
   try {
     _num = std::stod(str);
@@ -147,10 +150,10 @@ Record::setNum(double val)
 }
 
 void
-Record::setStr(std::string str)
+Record::setStr(std::string str, bool quoted)
 {
   _str = str;
-  _type = RECORD_STRING;
+  _type = quoted ? RECORD_QSTRING : RECORD_STRING;
 }
 
 const Ldr &
@@ -317,9 +320,9 @@ Ldr::setShape(const Ldr & ldr)
 }
 
 void
-Ldr::appendStr(std::string str)
+Ldr::appendStr(std::string str, bool quoted)
 {
-  _data.emplace_back(str);
+  _data.emplace_back(Record(str, quoted));
 }
 
 void
@@ -383,8 +386,6 @@ Ldrset::loadFile(const std::string filename)
   if (DEBUG)
     jcamp_yyset_debug(2, scanner);
   jcamp_yyset_in(fp, scanner);
-  //jcamp_yyset_lineno(0, scanner);
-  //jcamp_yyset_column(0, scanner);
   try {
     if (jcamp_yyparse(*this, scanner))
       std::cerr << "parse of '" << filename << "' failed\n";
@@ -404,14 +405,14 @@ Ldrset::loadFile(const std::string filename)
 }
 
 void
-Ldrset::loadString(const std::string jdxstring, std::string nametag)
+Ldrset::loadString(const std::string jdxstring)
 {
 #if !defined(__EMSCRIPTEN__) && 0
   extern int jcamp_yydebug;
 #endif
 
   // set lex to read from it instead of defaulting to STDIN:
-  _curfilename = nametag;
+  _curfilename = "string";
   jcamp_topnode = NULL;
 
   yyscan_t scanner;
@@ -423,8 +424,6 @@ Ldrset::loadString(const std::string jdxstring, std::string nametag)
     jcamp_yyset_debug(2, scanner);
   //jcamp_yyset_in(fp, scanner);
   jcamp_yy_scan_string(jdxstring.c_str(), scanner);
-  jcamp_yyset_lineno(1, scanner);
-  jcamp_yyset_column(0, scanner);
 
   try {
     if (jcamp_yyparse(*this, scanner))
@@ -442,7 +441,6 @@ Ldrset::loadString(const std::string jdxstring, std::string nametag)
   _ldrs = jcamp_topnode->_ldrs;
   _blocks = jcamp_topnode->_blocks;
   delete jcamp_topnode;
-  jcamp_topnode = NULL;
   validate();
 }
 
@@ -541,8 +539,10 @@ Ldrset::setString(const std::string label, std::string str, size_t idx, bool cre
 {
   if (_ldrs.count(label))
     _ldrs.at(label).setStr(str, idx);
-  else if (create)
+  else if (create) {
+    //! \todo  decide if quoted string or not
     addLdr(Ldr(RECORD_STRING, str, label));
+  }
   else {
     std::stringstream str;
     str << "Ldrset::setString no such label: '" << label << "'";
