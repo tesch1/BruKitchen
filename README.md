@@ -2,12 +2,13 @@
 utilities for dealing with bruker nmr/mri systems and data
 
 ## Matlab
-To use these utilities, run the script brukitchen_setup.m to compile the
-mex programs from within Matlab, then add this directory to your path:
+To use these utilities, run the script [brukitchen_setup.m](matlab/brukitchen_setup.m) to compile the
+mex programs from within Matlab, then add the matlab directory to your path:
 
 ```
+>> cd .../path/to/BruKitchen/matlab
 >> brukitchen_setup
->> addpath([getenv('HOME') '/src/BruKitchen/matlab']);
+>> addpath(['.../path/to/BruKitchen/matlab']);
 % then read an experiment directory:
 >> ex = read_bru_experiment('/opt/data/.../myexperiment')
 ex = 
