@@ -424,10 +424,10 @@ struct yy_trans_info
 static yyconst flex_int16_t yy_accept[109] =
     {   0,
         0,    0,    0,    0,   21,   19,   18,   18,   19,   19,
-       15,   14,   19,   16,   19,    6,   17,   19,    7,   19,
-       18,   19,   19,   14,   19,   16,   19,    6,   17,    7,
-        0,    0,    0,    0,    0,    6,    6,    6,    7,    7,
-        0,    8,   13,   13,   13,    6,    6,    6,    7,    7,
+       15,   14,   19,   16,   19,    6,   17,   19,    8,   19,
+       18,   19,   19,   14,   19,   16,   19,    6,   17,    8,
+        0,    0,    0,    0,    0,    6,    6,    6,    8,    8,
+        0,    7,   13,   13,   13,    6,    6,    6,    8,    8,
         0,    0,    0,    0,    0,    1,    1,    0,    0,    0,
         0,    0,    6,   13,   13,   13,    6,    0,    0,    5,
         0,    0,    0,    0,    0,    0,    0,    6,    6,    5,
@@ -591,7 +591,7 @@ static yyconst flex_int16_t yy_chk[313] =
 /* Table of booleans, true if rule could match eol. */
 static yyconst flex_int32_t yy_rule_can_match_eol[21] =
     {   0,
-1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 
+1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 
     0,     };
 
 /* The intent behind this definition is that it'll catch
@@ -637,7 +637,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[21] =
     return label;
   }
 
-  /* stupid jcamp */
+  /* stupid jcamp: these are special labels that are followed by TXT type */
   int istextlabel(char * text)
   {
     const char * tlabels[] = {"TITLE", "DATATYPE", "ORIGIN", "OWNER", NULL };
@@ -647,7 +647,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[21] =
     return 0;
   }
 
-  double data(char * match)
+  real_t data(char * match)
   {
     double v;
     if (!sscanf(match, "%lf", &v))
@@ -1074,12 +1074,12 @@ YY_RULE_SETUP
 { CC; yylval->num = data(yytext); return AFFN; }
 	YY_BREAK
 case 7:
+/* rule 7 can match eol */
 YY_RULE_SETUP
 #line 140 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
-{ CC; yylval->str = strdup(yytext); return STRING; }
+{ CC; yylval->str = strndup(&yytext[1], strlen(yytext) - 2); return QSTRING; }
 	YY_BREAK
 case 8:
-/* rule 8 can match eol */
 YY_RULE_SETUP
 #line 141 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 { CC; yylval->str = strdup(yytext); return STRING; }

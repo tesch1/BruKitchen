@@ -24,6 +24,7 @@ etc.  Attributes to the object are the method's parameters.
 '''
 
 import os
+import time
 import subprocess
 
 def is_exe(fpath):
@@ -497,6 +498,7 @@ class PvCmd(object):
                 #print cmd, p.returncode
                 #print("OS error running pvcmd: {0}".format(err))
                 raise ValueError("Error from pvcmd: %s" % (err))
+            time.sleep(0.1)
         except Exception as ex:
             print 'exception:', ex
             print cmd

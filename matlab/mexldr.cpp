@@ -15,7 +15,7 @@
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   char ldrfile[512];
-  const char * errmsg = "usage: paramstruct = mexLoadLDRS(ldrfile)\n";
+  const char * errmsg = "usage: paramstruct = mexldr('../path/to/ldrfile')\n";
   Ldrset ldrset;
   int count;
   int ii;
@@ -74,6 +74,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     switch (ldr.type()) {
     case RECORD_TEXT:
     case RECORD_STRING:
+    case RECORD_QSTRING:
       field_value = mxCreateCellMatrix(fieldcount, 1);
       for (j = 0; j < fieldcount; j++) {
         mxSetCell(field_value, j, mxCreateString(ldr.str(j).c_str()));

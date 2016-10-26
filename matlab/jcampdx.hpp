@@ -35,10 +35,18 @@
 #include <set>
 #include <vector>
 #include <memory>
+#ifndef real_t
+#ifdef REAL_FLOAT
+typedef float real_t;
+#else
+typedef double real_t;
+#endif
+#endif
 
 enum record_type {
   RECORD_TEXT,
   RECORD_STRING,
+  RECORD_QSTRING,
   RECORD_NUMERIC,
   RECORD_GROUP,
   RECORD_UNSET,
@@ -49,15 +57,15 @@ class Ldr;
 class Record {
 public:
   Record();
-  Record(std::string str);
-  Record(double val);
+  Record(std::string str, bool quoted = false);
+  Record(real_t val);
   Record(Ldr * ldr);
 
-  const double & num() const;
+  const real_t & num() const;
   const std::string & str() const;
   record_type type() const;
-  void setNum(double val);
-  void setStr(std::string str);
+  void setNum(real_t val);
+  void setStr(std::string str, bool quoted = false);
   const Ldr & group() const;
   void setType(record_type type);
 
@@ -66,7 +74,7 @@ public:
 private:
   record_type _type;
   std::string _str;
-  double _num;
+  real_t _num;
   Ldr * _ldr;
 };
 
@@ -80,7 +88,7 @@ public:
   Ldr();
   Ldr(std::string label);
   Ldr(record_type type, std::string str, std::string label = "");
-  Ldr(record_type type, double val, std::string label = "");
+  Ldr(record_type type, real_t val, std::string label = "");
 
   size_t size() const;
   std::vector<int> shape() const;
@@ -88,24 +96,24 @@ public:
 
   // get values
   const std::string & str(size_t idx = 0) const;
-  const double & num(size_t idx = 0) const;
+  const real_t & num(size_t idx = 0) const;
   record_type type(size_t idx = 0) const;
   void setStr(std::string str, size_t idx = 0);
-  void setNum(double val, size_t idx = 0);
+  void setNum(real_t val, size_t idx = 0);
 
   void setLabel(std::string label);
   void setShape(std::string variable_list);
   void setShape(const Ldr & shape);
 
-  void appendStr(std::string str);
-  void appendNum(double val);
+  void appendStr(std::string str, bool quoted = false);
+  void appendNum(real_t val);
   void appendGroup(Ldr * group);
 
   friend std::ostream & operator <<(std::ostream & out, Ldr const & l);
 
 private:
   std::vector<Record> _data;
-  //std::vector<double> _num; // special case -- optimize table data .. someday
+  //std::vector<real_t> _num; // special case -- optimize table data .. someday
   std::string _label;
   std::vector<int> _shape;
   enum shape_type { SHAPE_1D, SHAPE_2D, SHAPE_XYY, SHAPE_XYXY } _shape_type;
@@ -134,12 +142,12 @@ public:
 
   // data retreival
   bool labelExists(const std::string label) const;
-  std::string asString(const std::string label, size_t idx = 0) const;
-  double asDouble(const std::string label, size_t idx = 0) const;
+  std::string getString(const std::string label, size_t idx = 0) const;
+  real_t getDouble(const std::string label, size_t idx = 0) const;
 
   void newEmpty(const std::string label);
   void setString(const std::string label, std::string str, size_t idx = 0, bool create = false);
-  void setDouble(const std::string label, double val, size_t idx = 0, bool create = false);
+  void setDouble(const std::string label, real_t val, size_t idx = 0, bool create = false);
 
   // retrieve a sub-set of LDRs in the particular block
   Ldrset & getBlock(int blocknum);

@@ -37,6 +37,9 @@ operator <<(std::ostream & out, Record const & rr)
   case RECORD_STRING:
     out << rr._str;
     break;
+  case RECORD_QSTRING:
+    out << "<" << rr._str << ">";
+    break;
   case RECORD_NUMERIC:
     out << rr._num;
     break;
@@ -93,8 +96,8 @@ Record::Record()
 {
 }
 
-Record::Record(std::string str)
-  : _type(RECORD_STRING), _str(str), _num(0), _ldr(NULL)
+Record::Record(std::string str, bool quoted)
+  : _type(quoted ? RECORD_QSTRING : RECORD_STRING), _str(str), _num(0), _ldr(NULL)
 {
   try {
     _num = std::stod(str);
@@ -103,12 +106,12 @@ Record::Record(std::string str)
 #ifdef __EMSCRIPTEN__
     _num = 0;
 #else
-    _num = std::numeric_limits<double>::signaling_NaN();
+    _num = std::numeric_limits<real_t>::signaling_NaN();
 #endif
   }
 }
 
-Record::Record(double val)
+Record::Record(real_t val)
   : _type(RECORD_NUMERIC), _num(val), _ldr(NULL)
 {
   std::stringstream str;
@@ -121,7 +124,7 @@ Record::Record(Ldr * ldr)
 {
 }
 
-const double &
+const real_t &
 Record::num() const
 {
   return _num;
@@ -140,17 +143,17 @@ Record::type() const
 }
 
 void
-Record::setNum(double val)
+Record::setNum(real_t val)
 {
   _num = val;
   _type = RECORD_NUMERIC;
 }
 
 void
-Record::setStr(std::string str)
+Record::setStr(std::string str, bool quoted)
 {
   _str = str;
-  _type = RECORD_STRING;
+  _type = quoted ? RECORD_QSTRING : RECORD_STRING;
 }
 
 const Ldr &
@@ -207,7 +210,7 @@ Ldr::Ldr(record_type type, std::string str, std::string label)
   _data.back().setType(type);
 }
 
-Ldr::Ldr(record_type type, double val, std::string label)
+Ldr::Ldr(record_type type, real_t val, std::string label)
   : _label(label), _shape_type(SHAPE_1D)
 {
   appendNum(val);
@@ -244,7 +247,7 @@ Ldr::str(size_t idx) const
   return _data.at(idx).str();
 }
 
-const double &
+const real_t &
 Ldr::num(size_t idx) const
 {
   if (idx >= _data.size()) {
@@ -275,7 +278,7 @@ Ldr::setStr(std::string str, size_t idx)
 }
 
 void
-Ldr::setNum(double val, size_t idx)
+Ldr::setNum(real_t val, size_t idx)
 {
   if (idx >= _data.size())
     _data.resize(idx+1);
@@ -317,13 +320,13 @@ Ldr::setShape(const Ldr & ldr)
 }
 
 void
-Ldr::appendStr(std::string str)
+Ldr::appendStr(std::string str, bool quoted)
 {
-  _data.emplace_back(str);
+  _data.emplace_back(Record(str, quoted));
 }
 
 void
-Ldr::appendNum(double val)
+Ldr::appendNum(real_t val)
 {
   _data.emplace_back(val);
 }
@@ -503,22 +506,22 @@ Ldrset::labelExists(const std::string label) const
 }
 
 std::string
-Ldrset::asString(const std::string label, size_t idx) const
+Ldrset::getString(const std::string label, size_t idx) const
 {
   if (!_ldrs.count(label)) {
     std::stringstream str;
-    str << "Ldrset::asString no such label: '" << label << "'";
+    str << "Ldrset::getString no such label: '" << label << "'";
     throw std::out_of_range(str.str());
   }
   return _ldrs.at(label).str(idx);
 }
 
-double
-Ldrset::asDouble(const std::string label, size_t idx) const
+real_t
+Ldrset::getDouble(const std::string label, size_t idx) const
 {
   if (!_ldrs.count(label)) {
     std::stringstream str;
-    str << "Ldrset::asDouble no such label: '" << label << "'";
+    str << "Ldrset::getDouble no such label: '" << label << "'";
     throw std::out_of_range(str.str());
   }
   return _ldrs.at(label).num(idx);
@@ -551,7 +554,7 @@ Ldrset::setString(const std::string label, std::string str, size_t idx, bool cre
 }
 
 void
-Ldrset::setDouble(const std::string label, double val, size_t idx, bool create)
+Ldrset::setDouble(const std::string label, real_t val, size_t idx, bool create)
 {
   //std::cerr << "setDouble(" << label << ", " << val << ")\n";
   if (_ldrs.count(label))
@@ -583,24 +586,39 @@ Ldrset::getLabels()
 }
  
 #ifdef MAIN
+#include "cxxopts.hpp"
 int main(int argc, char *argv[])
 {
-  const char * filename = "/dev/stdin";
+  cxxopts::Options options(argv[0], "jcampdx data file utility");
+  options.add_options()
+    ("f,file",          "jcamp file to read",
+     cxxopts::value<std::vector<std::string> >()->default_value({"/dev/stdin"}))
+    ("s,se",            "something else",
+     cxxopts::value<std::vector<std::string> >()->default_value({"/dev/stdin"}))
+    ("h,help",          "print help message")
+    ("v,verbose",       "be verbose")
+    ;
+  options.parse(argc, argv);
+  options.parse_positional("file");
 
-  if (argc > 1)
-    filename = argv[1];
-
-  try {
-    Ldrset jc(filename);
-    if (DEBUG) {
-      std::cout << "done:\n";
-      std::cout << jc;
-    }
-    return 0;
+  if (options.count("help")) {
+    std::cout << options.help();
+    exit(0);
   }
-  catch (const std::exception & ex) {
-    std::cerr << "failed: " << ex.what() << "\n";
-    return -1;
+
+  for (auto & filename : options["file"].as<std::vector<std::string> >() ) {
+    try {
+      Ldrset jc(filename);
+      if (DEBUG) {
+        std::cout << "done:\n";
+        std::cout << jc;
+      }
+      return 0;
+    }
+    catch (const std::exception & ex) {
+      std::cerr << "failed: " << ex.what() << "\n";
+      return -1;
+    }
   }
 }
 #endif
