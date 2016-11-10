@@ -25,6 +25,7 @@ etc.  Attributes to the object are the method's parameters.
 
 import os
 import time
+import logging
 import subprocess
 
 def is_exe(fpath):
@@ -64,9 +65,10 @@ class PvObj(object):
             raise AttributeError("invalid object path: '%s'" % (objpath))
         #if not os.path.isfile(objpath + '/../../acqp'):
         #    print os.path.isdir(objpath),os.path.isfile(objpath + '/../../acqp')
-        #    raise AttributeError("invalid object path no acqp: '{0}'".format(objpath))
+        #    raise AttributeError("invalid object path no acqp: '%s'".format(objpath))
         self.__dict__['_objpath'] = objpath
         self.__dict__['_pvScan'] = pvScan
+        self.__dict__['log'] = logging.getLogger('PvObj[%s]' % objpath)
 
     def __str__(self):
         return self._objpath
@@ -117,6 +119,7 @@ class PvObj(object):
 
     def Clone(self):
         ''' clone the object described by pvobj, return the new PvObj '''
+        self.log.info('Clone')
         self._pvScan.SetObj(self)
         # maybe... ?   -procno <path> : prono path to clone. -- untested
         self._pvScan.Command('pvDsetClone', 'Scan', 'Current')
@@ -124,6 +127,7 @@ class PvObj(object):
 
     def CloneReco(self):
         ''' clone the object described by pvobj, return the new PvObj '''
+        self.log.info('CloneReco')
         self._pvScan.SetObj(self)
         self._pvScan.Command('pvDsetClone', 'Reco', 'Current')
         #pvScan pvDsetCloneProcno -procno path 0
@@ -139,14 +143,17 @@ class PvObj(object):
         # pvDsetObjListRemove OtherSubjects
 
     def ExportToTopspin(self):
+        self.log.info('ExportToTopspin')
         self._pvScan.SetObj(self)
         self._pvScan.Command('pvDsetExport')
 
     def Delete(self):
+        self.log.info('Delete')
         self._pvScan.SetObj(self)
         self._pvScan.Command('pvDsetDel', 'Scan', 'Current', '-Control', '-Alt')
 
     def DeleteReco(self):
+        self.log.info('DeleteReco')
         self._pvScan.SetObj(self)
         self._pvScan.Command('pvDsetDel', 'Reco', 'Current', '-Control', '-Alt')
 
@@ -177,10 +184,12 @@ class PvObj(object):
         'TRANSM' - reference transmitter gain
         from either category 'Standard' or 'Current'
         '''
+        self.log.info('Adjustment(%s,%s' % (adjustment, category))
         if adjustment not in ['RCVR', 'FREQ', 'SHIM', 'TRANSM']:
             raise ValueError('Adjustment must be "RCVR", "FREQ", or "SHIM"')
         if category not in ['Standard', 'Current']:
             raise ValueError('Adjustment Category must be "Standard" or "Current"')
+        self._pvScan.SetObj(self)
         self._pvScan.Command('pvStartGsauto', '-cmd', adjustment+'_'+category)
         self._pvScan.Sync(self._objpath)
 
@@ -188,6 +197,7 @@ class PvObj(object):
         '''
         like clicking the Traffic Light button in the Scan Control window (i think?)
         '''
+        self.log.info('Start')
         self._pvScan.SetObj(self)
         self._pvScan.Command('pvStartScan', '-Control', '-Alt')
         self._pvScan.Sync(self._objpath)
@@ -199,6 +209,7 @@ class PvObj(object):
         might cause a popup dialog which then needs to be closed
         by the mouse click :{
         '''
+        self.log.info('Stop')
         #self._pvScan.Command('pvStopScan','-quiet')
         self._pvScan.Command('pvStopMultiPipe')
         self._pvScan.Command('pvStopPipe', self._objpath)
@@ -269,6 +280,7 @@ class PvApp(object):
         else:
             self.pv = PvCmd()
         self.app = appname
+        self.log = logging.getLogger('PvApp[%s]' % appname)
         #self.commands = self.Command('CmdList').split(' ')
 
     def GetParam(self, param):
@@ -276,31 +288,33 @@ class PvApp(object):
         val = self.pv._run_pvcmd('-get', self.app, param)
         val = pythify(val)
         return val
-        
+
     def SetParam(self, param, value):
         ''' '''
         self.pv._run_pvcmd('-set', self.app, param, str(value))
-        self.Sync()
+        #self.Sync()
 
     def ParamList(self):
         ''' get a list of available parameters (maybe move to PvObj?) '''
         pass
-    
+
     def Sync(self, path=None):
         ''' '''
+        self.log.info('Sync(%s)' % path)
+        self.pv._run_pvcmd('-s', self.app)
         if path:
             self.pv._run_pvcmd('-s', path)
-        else:
-            self.pv._run_pvcmd('-s', self.app)
 
     def Command(self, *cmd):
         ''' send command to app, get results '''
         res = self.pv._run_pvcmd('-a', self.app, '-r', *cmd)
+        self.log.info('Command(%s)->%s' % (str(cmd), res))
         self.Sync()
         return res
 
     def CommandQuiet(self, *cmd):
         ''' send command to app, dont get results '''
+        self.log.info('CommandQuiet(%s)' % str(cmd))
         res = self.pv._run_pvcmd('-a', self.app, *cmd)
         self.Sync()
         return res
@@ -337,6 +351,7 @@ class PvScan(PvApp):
 
     def SetObj(self, pvobj):
         ''' set the currently selected object to pvobj '''
+        self.log.debug('SetObj(%s)' % pvobj)
         if is_int(pvobj):
             # just change the EXPNO
             newdir = self.GetParam('DU') + '/data/' + \
@@ -351,20 +366,24 @@ class PvScan(PvApp):
                 #self.CommandQuiet('pvDsetSsel', str(pvobj))
             else:
                 raise ValueError('PvCmd::SetObj: invalid (empty) expno:'+str(pvobj))
-        self.CommandQuiet('pvDsetObjSel', str(pvobj))
+        #self.CommandQuiet('pvDsetObjSel', str(pvobj))
+        #self.Command('pvDsetSsel', str(pvobj))
+        self.Command('pvDsetObjSel', str(pvobj))
 
     # pvDsetSsel New
     # pvDsetSsel New PROTOCOL LOCATION
     # pvDsetSsel Ok
     # pvDsetSsel Cancel
     # pvDsetSsel default
-    # pvDsetSsel <full path to processed data?>
+    # pvDsetSsel <full path to processed data>
+    # pvDsetSsel <0-based index into exp list in scan control window>
     # pvDsetSed -> open method editor
     # pvDsetPed -> open patient editor
     # pvDsetYed -> open study editor
 
     def GetObj(self, index=None, restore=True):
         ''' get the currently selected object, or the object at the numerical 'index' '''
+        self.log.info('GetObj(%s,%s)' % (index, restore))
         if index:
             if restore:
                 oldobj = self.ProcPath()
@@ -380,6 +399,7 @@ class PvScan(PvApp):
     def GetObjList(self):
         ''' return a list of all objecs in the object list '''
         ''' doens't really work '''
+        self.log.info('GetObjList')
         pvobjlist = []
         index = 0
         seen = []
@@ -409,6 +429,7 @@ class PvScan(PvApp):
 
     def CreateStudy(self, **kwargs):
         ''' create a new study, return path '''
+        self.log.info('CreateStudy')
         if not len(kwargs['subjectid']):
             raise ValueError('PvCmd::CreateStudy: invalid (empty) subjectid')
         # -studyname <name> -subjectid <id> -name <name> -subjectname <name> [ -birthdate YYYYMMDD ]
@@ -440,6 +461,7 @@ class PvScan(PvApp):
         protocol specified by protocolLoc / protocolName
         pvDsetListLocations
         '''
+        self.log.info('NewScan')
         self.Command('pvDsetSsel', 'New', protocolLoc, protocolName)
         return self.GetObj()
 
@@ -458,6 +480,7 @@ class PvCmd(object):
         self._pvcmd = ''
         self._pvapps = dict()
         self.verbose = False
+        self.log = logging.getLogger('PvCmd')
 
         # find the pvcmd binary
         if 'XWINNMRHOME' in os.environ:
@@ -465,9 +488,11 @@ class PvCmd(object):
         else:
             print "warning, XWINNMRHOME not set, defaulting to /opt/PV5.1/"
             self.XWINNMRHOME = "/opt/PV5.1"
+        self.log.info('XWINNMRHOME:%s' % self.XWINNMRHOME)
         self._pvcmd = self.XWINNMRHOME + "/prog/bin/scripts/pvcmd"
         if not is_exe(self._pvcmd):
             self._pvcmd = "./pvcmd.tester"
+            self.log.warning('PvCmd using test harness')
             #raise EnvironmentError("no pvcmd or XWINNMRHOME not set")
         self.runningApps()
         if 'pvScan' in self._pvapps.keys():
@@ -475,12 +500,13 @@ class PvCmd(object):
             self._pvapps['pvScan'] = PvScan(self)
         else:
             print 'pvScan not in running apps:',self._pvapps.keys()
+            self.log.error('pvScan not in running apps')
         #print "running apps:", self._pvapps.keys()
 
     def __setattr__(self, name, value):
-        if (name not in ['_pvcmd', '_pvapps', 'XWINNMRHOME', 'verbose']
+        if (name not in ['_pvcmd', '_pvapps', 'XWINNMRHOME', 'verbose', 'log']
             and not hasattr(self, name)): # would this create a new attribute?
-            raise AttributeError("Creating new attribute '%s' is not allowed!" % (name))
+            raise AttributeError("Creating new attribute '%s' is not allowed!" % name)
         super (PvCmd, self).__setattr__(name, value)
 
     def __getattr__(self, name):
@@ -490,15 +516,20 @@ class PvCmd(object):
         try:
             cmd = [self._pvcmd]
             cmd += args
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
-            res, err = p.communicate()
+            self.log.debug('#%s' % str(cmd))
+            p = subprocess.Popen(cmd, shell=False,
+                                 stdin=subprocess.PIPE,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
+            res, err = p.communicate(input='')
             if self.verbose:
                 print 'pvcmd: ', str(cmd[1:]), '/', res, '/', err, '/', p.returncode
+            self.log.debug(' =%s/%s/%s.' % (res, err, p.returncode))
             if p.returncode or len(err):
                 #print cmd, p.returncode
-                #print("OS error running pvcmd: {0}".format(err))
+                #print("OS error running pvcmd: %s".format(err))
                 raise ValueError("Error from pvcmd: %s" % (err))
-            time.sleep(0.1)
+            #time.sleep(0.1)
         except Exception as ex:
             print 'exception:', ex
             print cmd
