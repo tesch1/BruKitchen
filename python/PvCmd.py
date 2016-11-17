@@ -184,13 +184,14 @@ class PvObj(object):
         'TRANSM' - reference transmitter gain
         from either category 'Standard' or 'Current'
         '''
-        self.log.info('Adjustment(%s,%s' % (adjustment, category))
+        self.log.info('Adjustment(%s,%s)' % (adjustment, category))
         if adjustment not in ['RCVR', 'FREQ', 'SHIM', 'TRANSM']:
             raise ValueError('Adjustment must be "RCVR", "FREQ", or "SHIM"')
         if category not in ['Standard', 'Current']:
             raise ValueError('Adjustment Category must be "Standard" or "Current"')
         self._pvScan.SetObj(self)
         self._pvScan.Command('pvStartGsauto', '-cmd', adjustment+'_'+category)
+        time.sleep(10)
         self._pvScan.Sync(self._objpath)
 
     def Start(self):
@@ -251,7 +252,10 @@ def floatify(thing):
     ''' take a pvcmd string 'thing' and turn it into a representitive python object '''
     try:
         s = thing
-        return int(float(s)) if int(float(s)) == float(s) else float(s)
+        if int(float(s)) == float(s):
+            return int(float(s))
+        else:
+            return float(s)
     except:
         return thing
 
@@ -280,7 +284,7 @@ class PvApp(object):
         else:
             self.pv = PvCmd()
         self.app = appname
-        self.log = logging.getLogger('PvApp[%s]' % appname)
+        self.log = logging.getLogger('[%s]' % appname)
         #self.commands = self.Command('CmdList').split(' ')
 
     def GetParam(self, param):
@@ -308,7 +312,7 @@ class PvApp(object):
     def Command(self, *cmd):
         ''' send command to app, get results '''
         res = self.pv._run_pvcmd('-a', self.app, '-r', *cmd)
-        self.log.info('Command(%s)->%s' % (str(cmd), res))
+        self.log.info('Command %s->%s' % (str(cmd), res))
         self.Sync()
         return res
 
@@ -349,6 +353,17 @@ class PvScan(PvApp):
         return self.Command('pvErrorAlert', 'Python', message)
         #self.pv._run_pvcmd('-s', 'gui', app, message)
 
+    def DisableSomeErrors(self):
+        '''
+        Man kann einige Fehlermeldungen mit
+        pvcmd -a pvScan CprNoWait setdef ackn ok
+
+        abschalten (d.h. die Fehler werden automatisch bestaetigt). Das funktioniert 
+        aber nicht fuer alle Fehlermeldungen und ich weiss nicht, ob das hier eine 
+        der Fehlermeldungen ist, die man automatisch bestaetigen kann.
+        '''
+        self.Command('CprNoWait','setdef','ackn','ok')
+
     def SetObj(self, pvobj):
         ''' set the currently selected object to pvobj '''
         self.log.debug('SetObj(%s)' % pvobj)
@@ -366,9 +381,8 @@ class PvScan(PvApp):
                 #self.CommandQuiet('pvDsetSsel', str(pvobj))
             else:
                 raise ValueError('PvCmd::SetObj: invalid (empty) expno:'+str(pvobj))
-        #self.CommandQuiet('pvDsetObjSel', str(pvobj))
-        #self.Command('pvDsetSsel', str(pvobj))
-        self.Command('pvDsetObjSel', str(pvobj))
+        #self.CommandQuiet('pvDsetSsel', str(pvobj))
+        self.CommandQuiet('pvDsetObjSel', str(pvobj))
 
     # pvDsetSsel New
     # pvDsetSsel New PROTOCOL LOCATION
@@ -391,6 +405,7 @@ class PvScan(PvApp):
         try:
             pvobj = PvObj(self.ProcPath(), self)
         except:
+            self.log.warn('GetObj: unable to get obj at (%s)' % (self.ProcPath()))
             pvobj = None
         if index and restore:
             self.SetObj(oldobj)
@@ -417,7 +432,7 @@ class PvScan(PvApp):
                 except:
                     method = ''
                 pvobjlist += [(index, pvo, method)]
-            except Exception as ex:
+            except Exception, ex:
                 print 'GetObjList error', ex
                 break
         self.SetObj(selection)
@@ -495,6 +510,7 @@ class PvCmd(object):
             self.log.warning('PvCmd using test harness')
             #raise EnvironmentError("no pvcmd or XWINNMRHOME not set")
         self.runningApps()
+        self.log.info('Apps:%s' % self._pvapps.keys())
         if 'pvScan' in self._pvapps.keys():
             self._pvapps.pop('pvScan', None)
             self._pvapps['pvScan'] = PvScan(self)
@@ -530,11 +546,11 @@ class PvCmd(object):
                 #print("OS error running pvcmd: %s".format(err))
                 raise ValueError("Error from pvcmd: %s" % (err))
             #time.sleep(0.1)
-        except Exception as ex:
+        except Exception, ex:
             print 'exception:', ex
             print cmd
             raise ex
-        except ValueError as ex:
+        except ValueError, ex:
             raise ex
         #print res
         return res.strip()

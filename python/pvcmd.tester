@@ -27,10 +27,10 @@ if __name__ == '__main__':
     argv = sys.argv[1:]
     if argv[0] == '-l':
         print 'pvCmd pvScan'
-        exit(0)
+        sys.exit(0)
     elif argv[0] == '-s':
         # sync, just return
-        exit(0)
+        sys.exit(0)
     elif argv[0] == '-a':
         app = argv[1]
         argv = argv[2:]
@@ -50,7 +50,7 @@ if __name__ == '__main__':
         argv = argv[2:]
     else:
         print "unknowncmd"
-        exit(-1)
+        sys.exit(-1)
 
     if app == 'pvScan':
         if cmd == 'pvDsetPath':

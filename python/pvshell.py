@@ -186,7 +186,11 @@ class pvshell(cmd.Cmd):
         self.pv.PVExit()
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.WARN)
+    # setup logging to console and file
+    logging.basicConfig(filename='pvshell.log', level=logging.DEBUG)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.WARN)
+    logging.getLogger('').addHandler(ch)
     done = False
     pvs = pvshell()
     while not done:
