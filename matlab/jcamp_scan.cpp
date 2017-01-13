@@ -3,7 +3,6 @@
 #ifdef _WIN32
 #include <io.h>
 #endif
-#include <string>
 #include <iostream>
 #define YYERROR_VERBOSE
 typedef void* yyscan_t;
@@ -31,7 +30,7 @@ YY_DECL;
 
 
 
-#line 35 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.cpp"
+#line 34 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -614,11 +613,11 @@ static yyconst flex_int32_t yy_rule_can_match_eol[21] =
 
 /* special lex-modes */
 
-#line 52 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
+#line 51 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 
   char * makelabel(char * match)
   {
-    char * label = (char *)malloc(32);
+    char * label = (char *)malloc(strlen(match));
     char * cur = label;
     for (match += 2; *match && *match != '='; match++) {
 #if 0
@@ -640,9 +639,10 @@ static yyconst flex_int32_t yy_rule_can_match_eol[21] =
   /* stupid jcamp: these are special labels that are followed by TXT type */
   int istextlabel(char * text)
   {
-    const char * tlabels[] = {"TITLE", "DATATYPE", "ORIGIN", "OWNER", NULL };
+    const char * tlabels[] = {"TITLE", "DATATYPE", "ORIGIN", "OWNER",
+                              "XYZ_SOURCE", "DATE", "TIME", NULL };
     for (int ii = 0; tlabels[ii]; ii++)
-      if (!strcmp(tlabels[ii], text))
+      if (!strncmp(tlabels[ii], text, strlen(tlabels[ii])))
         return 1;
     return 0;
   }
@@ -1066,7 +1066,7 @@ YY_RULE_SETUP
 case 5:
 YY_RULE_SETUP
 #line 137 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
-{ if (istextlabel(yytext)) BEGIN(TXT); yylval->str = makelabel(yytext); return LABEL; }
+{ if (istextlabel(&yytext[2])) BEGIN(TXT); yylval->str = makelabel(yytext); return LABEL; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
