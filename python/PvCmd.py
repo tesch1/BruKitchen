@@ -444,7 +444,7 @@ class PvScan(PvApp):
 
     def CreateStudy(self, **kwargs):
         ''' create a new study, return path '''
-        self.log.info('CreateStudy')
+        self.log.info('CreateStudy:' + str(kwargs))
         if not len(kwargs['subjectid']):
             raise ValueError('PvCmd::CreateStudy: invalid (empty) subjectid')
         # -studyname <name> -subjectid <id> -name <name> -subjectname <name> [ -birthdate YYYYMMDD ]
