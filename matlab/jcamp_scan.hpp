@@ -7,7 +7,6 @@
 #ifdef _WIN32
 #include <io.h>
 #endif
-#include <string>
 #include <iostream>
 #define YYERROR_VERBOSE
 typedef void* yyscan_t;
@@ -35,7 +34,7 @@ YY_DECL;
 
 
 
-#line 39 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.hpp"
+#line 38 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.hpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -390,6 +389,6 @@ extern int jcamp_yylex \
 #line 169 "/Users/tesch/src/SpinDropsSDL/src/jcamp.l"
 
 
-#line 394 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.hpp"
+#line 393 "/Users/tesch/src/SpinDropsSDL/src/jcamp_scan.hpp"
 #undef jcamp_yyIN_HEADER
 #endif /* jcamp_yyHEADER_H */
