@@ -9,7 +9,6 @@
 #define FILELOC_HPP
 
 #include <string>
-#include <sstream>
 #include <typeinfo>
 
 /** \brief      file location for the source code producing a node
@@ -20,7 +19,7 @@ class FileLoc
 {
 public:
   FileLoc() :
-    first_line(0), first_column(0), last_line(0), last_column(0),
+    first_line(1), first_column(0), last_line(1), last_column(0),
     filename("?"), rawtext("*") {}
   unsigned int first_line;
   unsigned int first_column;
@@ -96,14 +95,14 @@ public:
   Loc_Error(const HASLOC * node, const std::exception & uplevel)
     : _loc()
   {
-    std::stringstream ers;
-    ers << uplevel.what() << " (";
+    std::string ers;
+    ers = uplevel.what() + std::string(" (");
     if (node) {
-      ers << typeid(*node).name();
+      ers += typeid(*node).name();
       _loc = node->loc();
     }
-    ers << ")";
-    _errstr = ers.str();
+    ers += ")";
+    _errstr = ers;
   }
 
   const FileLoc & loc() const { return _loc; };

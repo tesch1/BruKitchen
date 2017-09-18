@@ -11,6 +11,10 @@ jdxfiles = {'proc' 'procs' 'proc2' 'proc2s'...
 for fn=jdxfiles
     filename = [PathName '/' fn{1}];
     if exist(filename, 'file')==2
+        % matlab is stupid, this expands tildes in filenames:
+        blah = fopen(filename);
+        filename = fopen(blah);
+        fclose(blah);
         A.(fn{1}) = mexldr(filename);
         %disp(sprintf('loaded %s', filename));
     end
@@ -55,6 +59,12 @@ if exist([PathName '/title'])
     fclose(fp);
 end
 
+if exist([PathName '/pulseprogram'])
+    fp = fopen([PathName '/pulseprogram'],'r');
+    A.title = fread(fp, 'int8=>char')';
+    fclose(fp);
+end
+
 if exist([PathName '/ser'])
     fpre = fopen([PathName '/ser'],'r');
     A.fid = fread(fpre,'int32','l');
@@ -67,6 +77,9 @@ end
     
 if exist([PathName '/vdlist'])
     A.vdlist = read_bru_delaylist([PathName '/vdlist']);
+end
+if exist([PathName '/vclist'])
+    A.vclist = read_bru_delaylist([PathName '/vclist']);
 end
 
 if exist([PathName '/1r'])

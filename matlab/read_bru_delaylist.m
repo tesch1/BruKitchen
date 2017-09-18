@@ -4,6 +4,11 @@ function delays = read_bru_delaylist(filename)
 % (c) 2016, michael tesch
 %
 
+% matlab is stupid, this expands tildes in filenames:
+blah = fopen(filename);
+filename = fopen(blah);
+fclose(blah);
+
 A = textread(filename,'%s','whitespace','\n');
 
 % tetermine the kind of line

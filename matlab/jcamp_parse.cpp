@@ -68,7 +68,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:339  */
+#line 1 "src/jcamp.y" /* yacc.c:339  */
 
 /*
  * (c)2016 Michael Tesch. tesch1@gmail.com
@@ -78,8 +78,6 @@
  *
  */
 #include <stdio.h>
-#include <iostream>
-#include <sstream>
 
 #ifndef __EMSCRIPTEN__
 #define YYERROR_VERBOSE
@@ -95,7 +93,7 @@ static void jcamp_yyerror(_YYLTYPE * yylloc, Ldrset & jdx, yyscan_t scanner, con
 using ppg::Loc_Error;
 
 
-#line 99 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:339  */
+#line 97 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -115,8 +113,8 @@ using ppg::Loc_Error;
 
 /* In a future release of Bison, this section will be replaced
    by #include "jcamp_parse.hpp".  */
-#ifndef YY_JCAMP_YY_USERS_TESCH_SRC_SPINDROPSSDL_SRC_JCAMP_PARSE_HPP_INCLUDED
-# define YY_JCAMP_YY_USERS_TESCH_SRC_SPINDROPSSDL_SRC_JCAMP_PARSE_HPP_INCLUDED
+#ifndef YY_JCAMP_YY_HOME_TESCH_SRC_SPINDROPSSDL_BUILD_JCAMP_PARSE_HPP_INCLUDED
+# define YY_JCAMP_YY_HOME_TESCH_SRC_SPINDROPSSDL_BUILD_JCAMP_PARSE_HPP_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -147,14 +145,14 @@ extern int jcamp_yydebug;
 
 union YYSTYPE
 {
-#line 41 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:355  */
+#line 39 "src/jcamp.y" /* yacc.c:355  */
 
   Ldrset * block;
   Ldr * ldr;
   char * str;
   real_t num;
 
-#line 158 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:355  */
+#line 156 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -180,11 +178,11 @@ struct YYLTYPE
 
 int jcamp_yyparse (Ldrset & jdx, yyscan_t scanner);
 
-#endif /* !YY_JCAMP_YY_USERS_TESCH_SRC_SPINDROPSSDL_SRC_JCAMP_PARSE_HPP_INCLUDED  */
+#endif /* !YY_JCAMP_YY_HOME_TESCH_SRC_SPINDROPSSDL_BUILD_JCAMP_PARSE_HPP_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
-#line 188 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:358  */
+#line 186 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -484,9 +482,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    62,    62,    66,    67,    71,    76,    84,    85,    86,
-      87,    91,    97,   107,   112,   120,   124,   125,   126,   127,
-     128,   132,   133,   137,   138,   139
+       0,    60,    60,    64,    65,    69,    74,    82,    83,    84,
+      85,    89,    95,   105,   110,   118,   122,   123,   124,   125,
+     126,   130,   131,   135,   136,   137
 };
 #endif
 
@@ -1096,9 +1094,9 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocatio
   switch (yytype)
     {
           case 17: /* block  */
-#line 55 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1257  */
+#line 53 "src/jcamp.y" /* yacc.c:1257  */
       { delete ((*yyvaluep).block); }
-#line 1102 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1257  */
+#line 1100 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1257  */
         break;
 
 
@@ -1390,77 +1388,77 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 62 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 60 "src/jcamp.y" /* yacc.c:1646  */
     { jdx.jcamp_topnode = (yyval.block) = (yyvsp[0].block); }
-#line 1396 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1394 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 66 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 64 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.block) = (yyvsp[-1].block); (yyval.block)->addBlock((yyvsp[0].block)); }
-#line 1402 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1400 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 67 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 65 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.block) = (yyvsp[0].block); }
-#line 1408 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1406 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 72 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 70 "src/jcamp.y" /* yacc.c:1646  */
     {
           (yyval.block) = (yyvsp[-1].block);
           (yyval.block)->addLdr("TITLE", *(yyvsp[-2].ldr));
         }
-#line 1417 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1415 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 77 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 75 "src/jcamp.y" /* yacc.c:1646  */
     {
           (yyval.block) = (yyvsp[-1].block);
           (yyval.block)->addLdr("TITLE", Ldr());
         }
-#line 1426 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1424 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 84 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 82 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.block) = (yyvsp[-1].block); (yyval.block)->addLdr(*(yyvsp[0].ldr)); }
-#line 1432 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1430 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 85 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 83 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.block) = (yyvsp[-1].block); (yyval.block)->addBlock((yyvsp[0].block)); }
-#line 1438 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1436 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 86 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 84 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.block) = new Ldrset(); (yyval.block)->addLdr(*(yyvsp[0].ldr)); }
-#line 1444 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1442 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 87 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 85 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.block) = new Ldrset(); (yyval.block)->addBlock((yyvsp[0].block)); }
-#line 1450 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1448 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 92 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 90 "src/jcamp.y" /* yacc.c:1646  */
     {
           (yyval.ldr) = (yyvsp[0].ldr);
           (yyval.ldr)->setLabel((yyvsp[-2].str));
           (yyval.ldr)->setShape((yyvsp[-1].str));
         }
-#line 1460 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1458 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 98 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 96 "src/jcamp.y" /* yacc.c:1646  */
     {
           if ((yyvsp[0].ldr)->size()) {
             (yyval.ldr) = (yyvsp[0].ldr);
@@ -1470,95 +1468,95 @@ yyreduce:
           }
           (yyval.ldr)->setLabel((yyvsp[-2].str));
         }
-#line 1474 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1472 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 108 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 106 "src/jcamp.y" /* yacc.c:1646  */
     {
           (yyval.ldr) = (yyvsp[0].ldr);
           (yyval.ldr)->setLabel((yyvsp[-1].str));
         }
-#line 1483 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1481 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 113 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 111 "src/jcamp.y" /* yacc.c:1646  */
     {
           (yyval.ldr) = new Ldr(RECORD_TEXT, (yyvsp[0].str));
           (yyval.ldr)->setLabel((yyvsp[-1].str));
         }
-#line 1492 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1490 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 120 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 118 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.ldr) = (yyvsp[-1].ldr); }
-#line 1498 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1496 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 124 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 122 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.ldr) = (yyvsp[-1].ldr); (yyval.ldr)->appendStr((yyvsp[0].str)); }
-#line 1504 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1502 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 125 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 123 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.ldr) = (yyvsp[-1].ldr); (yyval.ldr)->appendStr((yyvsp[0].str), true); }
-#line 1510 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1508 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 126 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 124 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.ldr) = (yyvsp[-1].ldr); (yyval.ldr)->appendNum((yyvsp[0].num)); }
-#line 1516 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1514 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 127 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 125 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.ldr) = (yyvsp[-1].ldr); (yyval.ldr)->appendGroup((yyvsp[0].ldr)); }
-#line 1522 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1520 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 128 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 126 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.ldr) = new Ldr(); }
-#line 1528 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1526 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 132 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 130 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.num) = (yyvsp[0].num); }
-#line 1534 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1532 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 133 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 131 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.num) = (yyvsp[0].num); }
-#line 1540 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1538 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 137 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 135 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.ldr) = new Ldr(RECORD_STRING, (yyvsp[0].str)); }
-#line 1546 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1544 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 138 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 136 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.ldr) = new Ldr(RECORD_QSTRING, (yyvsp[0].str)); }
-#line 1552 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1550 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 139 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1646  */
+#line 137 "src/jcamp.y" /* yacc.c:1646  */
     { (yyval.ldr) = new Ldr(RECORD_STRING, (yyvsp[0].str)); }
-#line 1558 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1556 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1562 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.cpp" /* yacc.c:1646  */
+#line 1560 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1793,14 +1791,14 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 142 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1906  */
+#line 140 "src/jcamp.y" /* yacc.c:1906  */
 
 
 void jcamp_yyerror(_YYLTYPE * yylloc, Ldrset & , yyscan_t , const char *s)
 {
-  std::stringstream errstr;
+  stringstream errstr;
   errstr << "parse: " << yylloc->filename
          << "@" << yylloc->first_line << ":" << yylloc->first_column
-         << ": " << s << std::endl;
+         << ": " << s << "\n";
   throw Loc_Error(*yylloc, errstr.str());
 }

@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_JCAMP_YY_USERS_TESCH_SRC_SPINDROPSSDL_SRC_JCAMP_PARSE_HPP_INCLUDED
-# define YY_JCAMP_YY_USERS_TESCH_SRC_SPINDROPSSDL_SRC_JCAMP_PARSE_HPP_INCLUDED
+#ifndef YY_JCAMP_YY_HOME_TESCH_SRC_SPINDROPSSDL_BUILD_JCAMP_PARSE_HPP_INCLUDED
+# define YY_JCAMP_YY_HOME_TESCH_SRC_SPINDROPSSDL_BUILD_JCAMP_PARSE_HPP_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -62,14 +62,14 @@ extern int jcamp_yydebug;
 
 union YYSTYPE
 {
-#line 41 "/Users/tesch/src/SpinDropsSDL/src/jcamp.y" /* yacc.c:1909  */
+#line 39 "src/jcamp.y" /* yacc.c:1909  */
 
   Ldrset * block;
   Ldr * ldr;
   char * str;
   real_t num;
 
-#line 73 "/Users/tesch/src/SpinDropsSDL/src/jcamp_parse.hpp" /* yacc.c:1909  */
+#line 73 "/home/tesch/src/SpinDropsSDL/Build/jcamp_parse.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -95,4 +95,4 @@ struct YYLTYPE
 
 int jcamp_yyparse (Ldrset & jdx, yyscan_t scanner);
 
-#endif /* !YY_JCAMP_YY_USERS_TESCH_SRC_SPINDROPSSDL_SRC_JCAMP_PARSE_HPP_INCLUDED  */
+#endif /* !YY_JCAMP_YY_HOME_TESCH_SRC_SPINDROPSSDL_BUILD_JCAMP_PARSE_HPP_INCLUDED  */

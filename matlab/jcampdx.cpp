@@ -1,6 +1,6 @@
 // -*-  Mode: C++; c-basic-offset: 2 -*-
 // 
-// JCAMP-DX c++ class
+// JCAMP-DX c++ class and json conversion
 //
 // (c)2016 Michael Tesch, tesch1@gmail.com
 //
@@ -10,8 +10,6 @@
 //  Appl. Spectrosc. 42(1), pp151-162, 1988
 //
 
-#include <iostream>
-#include <sstream>
 #include <limits>
 #include <algorithm>
 
@@ -29,8 +27,28 @@
 int jcamp_yyparse (Ldrset & jdx, yyscan_t scanner);
 #endif
 
-std::ostream &
-operator <<(std::ostream & out, Record const & rr)
+#ifdef _WIN32
+#include <malloc.h>
+
+char *
+strndup(const char *s, size_t n)
+{
+  char *result;
+  size_t len = strlen(s);
+
+  if (n < len)
+    len = n;
+
+  result = (char *)malloc(len + 1);
+  if (!result)
+    return 0;
+
+  result[len] = '\0';
+  return (char *)memcpy(result, s, len);
+}
+#endif // _WIN32
+
+ostream & operator <<(ostream & out, Ldr::Record const & rr)
 {
   switch (rr._type) {
   case RECORD_TEXT:
@@ -45,6 +63,7 @@ operator <<(std::ostream & out, Record const & rr)
     break;
   case RECORD_UNSET:
     out << "?";
+    break;
   case RECORD_GROUP:
     out << "(" << rr.group() << ")";
     break;
@@ -52,8 +71,7 @@ operator <<(std::ostream & out, Record const & rr)
   return out;
 }
 
-std::ostream &
-operator <<(std::ostream & out, Ldr const & l)
+ostream & operator <<(ostream & out, Ldr const & l)
 {
   try {
     if (l._label.size())
@@ -64,14 +82,13 @@ operator <<(std::ostream & out, Ldr const & l)
       out << *it << " ";
   }
   catch (const std::exception & ex) {
-    std::cerr << "error in Ldr '" << l._label << ex.what() << "'\n";
+    ERROR("error in Ldr '" << l._label << ex.what() << "'\n");
     throw;
   }
   return out;
 }
 
-std::ostream &
-operator <<(std::ostream & out, Ldrset const & l)
+ostream & operator <<(ostream & out, Ldrset const & l)
 {
   for (auto li = l._ldrs.begin(); li != l._ldrs.end(); li++)
     if (li->first == "TITLE")
@@ -90,13 +107,12 @@ operator <<(std::ostream & out, Ldrset const & l)
 
 // //////////////////////////////////////////////////////////
 // Record
-
-Record::Record()
+Ldr::Record::Record()
   : _type(RECORD_UNSET), _num(0), _ldr(NULL)
 {
 }
 
-Record::Record(std::string str, bool quoted)
+Ldr::Record::Record(const string & str, bool quoted)
   : _type(quoted ? RECORD_QSTRING : RECORD_STRING), _str(str), _num(0), _ldr(NULL)
 {
   try {
@@ -111,63 +127,61 @@ Record::Record(std::string str, bool quoted)
   }
 }
 
-Record::Record(real_t val)
+Ldr::Record::Record(real_t val)
   : _type(RECORD_NUMERIC), _num(val), _ldr(NULL)
 {
-  std::stringstream str;
-  str << val;
-  _str = str.str();
+  _str = std::to_string(val);
 }
 
-Record::Record(Ldr * ldr)
+Ldr::Record::Record(Ldr * ldr)
   : _type(RECORD_GROUP), _ldr(ldr)
 {
 }
 
 const real_t &
-Record::num() const
+Ldr::Record::num() const
 {
   return _num;
 }
 
-const std::string &
-Record::str() const
+const string &
+Ldr::Record::str() const
 {
   return _str;
 }
 
 record_type
-Record::type() const
+Ldr::Record::type() const
 {
   return _type;
 }
 
 void
-Record::setNum(real_t val)
+Ldr::Record::setNum(real_t val)
 {
   _num = val;
   _type = RECORD_NUMERIC;
 }
 
 void
-Record::setStr(std::string str, bool quoted)
+Ldr::Record::setStr(const string & str, bool quoted)
 {
   _str = str;
   _type = quoted ? RECORD_QSTRING : RECORD_STRING;
 }
 
 const Ldr &
-Record::group() const
+Ldr::Record::group() const
 {
   if (!_ldr) {
-    std::cerr << "group() fail" << _type << " " << _str << "\n";
+    ERROR("group() fail" << _type << " " << _str << "\n");
     throw std::out_of_range("NULL ldr group");
   }
   return *_ldr;
 }
 
 void
-Record::setType(record_type type)
+Ldr::Record::setType(record_type type)
 {
   _type = type;
 }
@@ -176,18 +190,18 @@ Record::setType(record_type type)
 // //////////////////////////////////////////////////////////
 // Label
 static void
-removeCharsFromString(std::string & str, const char * charsToRemove)
+removeCharsFromString(string & str, const char * charsToRemove)
 {
   for (unsigned int ii = 0; ii < strlen(charsToRemove); ++ii) {
     str.erase(std::remove(str.begin(), str.end(), charsToRemove[ii]), str.end());
   }
 }
 
-Label::Label(std::string name)
+Label::Label(string name)
 {
   for (auto & c: name) c = toupper(c);
   removeCharsFromString(name, " -/_$");
-  std::string::assign(name);
+  string::assign(name);
 }
 
 // //////////////////////////////////////////////////////////
@@ -198,19 +212,19 @@ Ldr::Ldr()
 {
 }
 
-Ldr::Ldr(std::string label)
+Ldr::Ldr(const string & label)
   : _label(label), _shape_type(SHAPE_1D)
 {
 }
 
-Ldr::Ldr(record_type type, std::string str, std::string label)
+Ldr::Ldr(record_type type, const string & str, const string & label)
   : _label(label), _shape_type(SHAPE_1D)
 {
   appendStr(str);
   _data.back().setType(type);
 }
 
-Ldr::Ldr(record_type type, real_t val, std::string label)
+Ldr::Ldr(record_type type, real_t val, const string & label)
   : _label(label), _shape_type(SHAPE_1D)
 {
   appendNum(val);
@@ -230,17 +244,17 @@ Ldr::shape() const
   return d;
 }
 
-std::string
+string
 Ldr::label() const
 {
   return _label;
 }
 
-const std::string &
+const string &
 Ldr::str(size_t idx) const
 {
   if (idx >= _data.size()) {
-    std::stringstream str;
+    stringstream str;
     str << "Ldr::str " << _label << " index error: '" << idx << "/" << _data.size() << "'";
     throw std::out_of_range(str.str());
   }
@@ -251,7 +265,7 @@ const real_t &
 Ldr::num(size_t idx) const
 {
   if (idx >= _data.size()) {
-    std::stringstream str;
+    stringstream str;
     str << "Ldr::num " << _label << " index error: '" << idx << "/" << _data.size() << "'";
     throw std::out_of_range(str.str());
   }
@@ -262,7 +276,7 @@ record_type
 Ldr::type(size_t idx) const
 {
   if (idx >= _data.size()) {
-    std::stringstream str;
+    stringstream str;
     str << "Ldr::type " << _label << " index error: '" << idx << "/" << _data.size() << "'";
     throw std::out_of_range(str.str());
   }
@@ -270,7 +284,7 @@ Ldr::type(size_t idx) const
 }
 
 void
-Ldr::setStr(std::string str, size_t idx)
+Ldr::setStr(const string & str, size_t idx)
 {
   if (idx >= _data.size())
     _data.resize(idx+1);
@@ -286,13 +300,13 @@ Ldr::setNum(real_t val, size_t idx)
 }
 
 void
-Ldr::setLabel(std::string label)
+Ldr::setLabel(const string & label)
 {
   _label = label;
 }
 
 void
-Ldr::setShape(std::string shape)
+Ldr::setShape(const string & shape)
 {
   int a,b;
   if (shape == "(X++(Y..Y))") {
@@ -307,7 +321,7 @@ Ldr::setShape(std::string shape)
     _shape_type = SHAPE_XYY;
   }
   else {
-    std::cerr << "unknown shape type: " << shape << "\n";
+    ERROR("unknown shape type: " << shape << "\n");
   }
 }
 
@@ -320,9 +334,9 @@ Ldr::setShape(const Ldr & ldr)
 }
 
 void
-Ldr::appendStr(std::string str, bool quoted)
+Ldr::appendStr(const string & str, bool quoted)
 {
-  _data.emplace_back(Record(str, quoted));
+  _data.emplace_back(str, quoted);
 }
 
 void
@@ -344,7 +358,7 @@ Ldrset::Ldrset()
 {
 }
 
-Ldrset::Ldrset(const std::string filename)
+Ldrset::Ldrset(const string & filename)
 {
   loadFile(filename);
 }
@@ -360,7 +374,7 @@ Ldrset::size() const
 }
 
 void
-Ldrset::loadFile(const std::string filename)
+Ldrset::loadFile(const string & filename)
 {
 #if !defined(__EMSCRIPTEN__) && 0
   extern int jcamp_yydebug;
@@ -369,8 +383,8 @@ Ldrset::loadFile(const std::string filename)
   FILE *fp = fopen(filename.c_str(), "r");
 
   if (!fp) {
-    std::stringstream str;
-    str << "invalid input file: " << filename << ": " << strerror(errno) << std::endl;
+    stringstream str;
+    str << "invalid input file: " << filename << ": " << strerror(errno) << "\n";
     throw std::invalid_argument(str.str());
   }
 
@@ -390,24 +404,30 @@ Ldrset::loadFile(const std::string filename)
   //jcamp_yyset_column(0, scanner);
   try {
     if (jcamp_yyparse(*this, scanner))
-      std::cerr << "parse of '" << filename << "' failed\n";
+      ERROR("parse of '" << filename << "' failed\n");
   }
   catch (const std::exception & ex) {
     jcamp_yylex_destroy(scanner);
     throw;
   }
 
-  if (DEBUG) std::cerr << "parse done " << jcamp_topnode << "\n";
+  if (DEBUG) INFO("parse done " << jcamp_topnode << "\n");
 
   fclose(fp);
-  _ldrs = jcamp_topnode->_ldrs;
-  _blocks = jcamp_topnode->_blocks;
+
+  // newly loaded ldrs override existing ldrs
+  jcamp_topnode->_ldrs.insert(_ldrs.begin(), _ldrs.end());
+  std::swap(jcamp_topnode->_ldrs, _ldrs);
+  // these are just pointers, so nothing will be overridden, just combined. maybe should
+  // someday fix (todo) so that blocks with same TITLE get combined.
+  _blocks.insert(_blocks.end(), jcamp_topnode->_blocks.begin(), jcamp_topnode->_blocks.end());
   delete jcamp_topnode;
+  jcamp_topnode = NULL;
   validate();
 }
 
 void
-Ldrset::loadString(const std::string jdxstring, std::string nametag)
+Ldrset::loadString(const string & jdxstring, const string & nametag)
 {
 #if !defined(__EMSCRIPTEN__) && 0
   extern int jcamp_yydebug;
@@ -431,7 +451,7 @@ Ldrset::loadString(const std::string jdxstring, std::string nametag)
 
   try {
     if (jcamp_yyparse(*this, scanner))
-      std::cerr << "parse of string failed\n";
+      ERROR("parse of string failed\n");
   }
   catch (const std::exception & ex) {
     jcamp_yylex_destroy(scanner);
@@ -440,10 +460,15 @@ Ldrset::loadString(const std::string jdxstring, std::string nametag)
 
   jcamp_yylex_destroy(scanner);
 
-  if (DEBUG) std::cerr << "parse done " << jcamp_topnode << "\n";
+  if (DEBUG)
+    INFO("parse done " << jcamp_topnode << "\n");
 
-  _ldrs = jcamp_topnode->_ldrs;
-  _blocks = jcamp_topnode->_blocks;
+  // newly loaded ldrs override existing ldrs
+  jcamp_topnode->_ldrs.insert(_ldrs.begin(), _ldrs.end());
+  std::swap(jcamp_topnode->_ldrs, _ldrs);
+  // these are just pointers, so nothing will be overridden, just combined. maybe should
+  // someday fix (todo) so that blocks with same TITLE get combined.
+  _blocks.insert(_blocks.end(), jcamp_topnode->_blocks.begin(), jcamp_topnode->_blocks.end());
   delete jcamp_topnode;
   jcamp_topnode = NULL;
   validate();
@@ -457,35 +482,43 @@ Ldrset::clear()
 }
 
 void
-Ldrset::addLdr(const std::string label, const Ldr & ldr)
+Ldrset::addLdr(const string & label, const Ldr & ldr)
 {
-  if (DEBUG) std::cerr << "addingLdr '" << label << "' " << ldr << "\n";
+  if (DEBUG) INFO("addingLdr '" << label << "' " << ldr << "\n");
   _ldrs.emplace(label, ldr).first->second.setLabel(label);
 }
 
 void
 Ldrset::addLdr(const Ldr & ldr)
 {
-  if (DEBUG) std::cerr << "addingLdr '" << ldr.label() << "' " << ldr << "\n";
+  if (DEBUG) INFO("addingLdr '" << ldr.label() << "' " << ldr << "\n");
   _ldrs.emplace(ldr.label(), ldr);
 }
 
 void
 Ldrset::addBlock(Ldrset * ldrset)
 {
-  if (DEBUG) std::cerr << "addingBlock" << "" << "\n";
+  if (DEBUG) INFO("addingBlock\n");
   ldrset->validate();
   _blocks.push_back(std::shared_ptr<Ldrset>(ldrset));
 }
 
 void
-Ldrset::deleteLdr(const std::string label)
+Ldrset::deleteLdr(const string & label)
 {
   _ldrs.erase(label);
 }
 
 Ldr &
-Ldrset::getLdr(const std::string label)
+Ldrset::getLdr(const string & label)
+{
+  if (!_ldrs.count(label))
+    throw std::out_of_range("getLdr no such label:" + label);
+  return _ldrs.at(label);
+}
+
+const Ldr &
+Ldrset::getLdr(const string & label) const
 {
   if (!_ldrs.count(label))
     throw std::out_of_range("getLdr no such label:" + label);
@@ -495,128 +528,269 @@ Ldrset::getLdr(const std::string label)
 void
 Ldrset::validate() const
 {
-  if (DEBUG) std::cerr << "validate" << "" << "\n";
+  if (DEBUG) INFO("validate" << "" << "\n");
 }
 
 // data retreival functions
 bool
-Ldrset::labelExists(const std::string label) const
+Ldrset::labelExists(const string & label) const
 {
   return _ldrs.count(label) > 0;
 }
 
-std::string
-Ldrset::getString(const std::string label, size_t idx) const
+string
+Ldrset::getString(const string & label, size_t idx) const
 {
   if (!_ldrs.count(label)) {
-    std::stringstream str;
-    str << "Ldrset::getString no such label: '" << label << "'";
-    throw std::out_of_range(str.str());
+    throw std::out_of_range("Ldrset::getString no such label: '" + label + "'");
   }
   return _ldrs.at(label).str(idx);
 }
 
 real_t
-Ldrset::getDouble(const std::string label, size_t idx) const
+Ldrset::getDouble(const string & label, size_t idx) const
 {
   if (!_ldrs.count(label)) {
-    std::stringstream str;
-    str << "Ldrset::getDouble no such label: '" << label << "'";
-    throw std::out_of_range(str.str());
+    throw std::out_of_range("Ldrset::getDouble no such label: '" + label + "'");
   }
   return _ldrs.at(label).num(idx);
 }
 
 void
-Ldrset::newEmpty(const std::string label)
+Ldrset::newEmpty(const string & label)
 {
   if (_ldrs.count(label)) {
-    return;
-    std::stringstream str;
-    str << "Ldrset::newEmpty label exitst: '" << label << "'";
-    throw std::out_of_range(str.str());
+    return; //! \todo comment this out -- be less tolerant
+    throw std::out_of_range("Ldrset::newEmpty label exitst: '" + label + "'");
   }
   addLdr(Ldr(label));
 }
 
 void
-Ldrset::setString(const std::string label, std::string str, size_t idx, bool create)
+Ldrset::setString(const string & label, const string & str, size_t idx, bool create)
 {
-  if (_ldrs.count(label))
-    _ldrs.at(label).setStr(str, idx);
-  else if (create)
-    addLdr(Ldr(RECORD_STRING, str, label));
-  else {
-    std::stringstream str;
-    str << "Ldrset::setString no such label: '" << label << "'";
-    throw std::out_of_range(str.str());
+  if (!_ldrs.count(label)) {
+    if (create)
+      newEmpty(label);
+    else {
+      throw std::out_of_range("Ldrset::setString no such label: '" + label + "'");
+    }
   }
+  _ldrs.at(label).setStr(str, idx);
 }
 
 void
-Ldrset::setDouble(const std::string label, real_t val, size_t idx, bool create)
+Ldrset::setDouble(const string & label, real_t val, size_t idx, bool create)
 {
-  //std::cerr << "setDouble(" << label << ", " << val << ")\n";
-  if (_ldrs.count(label))
-    _ldrs.at(label).setNum(val, idx);
-  else if (create)
-    addLdr(Ldr(RECORD_NUMERIC, val, label));
-  else {
-    std::stringstream str;
-    str << "Ldrset::setDouble no such label: '" << label << "'";
-    throw std::out_of_range(str.str());
+  //INFO("setDouble(" << label << "[" << idx << "] = " << val << ")\n");
+  if (!_ldrs.count(label)) {
+    if (create)
+      newEmpty(label);
+    else {
+      throw std::out_of_range("Ldrset::setDouble no such label: '" + label + "'");
+    }
   }
+  _ldrs.at(label).setNum(val, idx);
 }
 
 // retrieve a sub-set of LDRs in the particular block
-Ldrset &
+std::shared_ptr<Ldrset>
 Ldrset::getBlock(int blocknum)
 {
-  return *_blocks[blocknum];
+  return _blocks.at(blocknum);
+}
+
+size_t Ldrset::getBlockCount() const
+{
+  return _blocks.size();
 }
 
 //
-std::set<std::string>
-Ldrset::getLabels()
+std::set<string>
+Ldrset::getLabels() const
 {
-  std::set<std::string> labels;
-  for (auto it : _ldrs)
+  std::set<string> labels;
+  for (auto & it : _ldrs)
     labels.insert(it.second.label());
   return labels;
 }
- 
-#ifdef MAIN
+
+#ifdef JCAMP_TO_JSON
+//
+// Ldr::Record
+//
+json Ldr::Record::to_json() const
+{
+  json jj;
+  switch (_type) {
+  case RECORD_TEXT:
+  case RECORD_STRING:
+  case RECORD_QSTRING:
+    jj = _str;
+    break;
+  case RECORD_NUMERIC:
+    jj = _num;
+    break;
+  case RECORD_GROUP:
+    jj = _ldr->to_json();
+    break;
+  case RECORD_UNSET:
+    jj = {};
+  }
+  return jj;
+}
+
+void from_json(const json & jj, Ldr::Record & record)
+{
+  if (jj.is_string())
+    record = Ldr::Record(jj.get<string>(), true);
+  else if (jj.is_number())
+    record = Ldr::Record(jj.get<real_t>());
+  else if (jj.is_array()) {
+    Ldr * ldr = new Ldr();
+    from_json(jj, *ldr);
+    record = Ldr::Record(ldr);
+  }
+  else
+    ERROR("Unable to convert JSON to Record: " << jj.dump() << "\n");
+}
+
+//
+// Ldr - convert an Ldr/Ldrset to json
+//
+json Ldr::to_json() const
+{
+  json jj = json::object();
+  jj["label"] = label();
+  json data;
+  for (auto & record : _data) {
+    json rec = record.to_json();
+    data.push_back(rec);
+  }
+  jj["data"] = data;
+  if (_shape.size()) {
+    jj["shape"] = _shape;
+    jj["shape_type"] = _shape_type;
+  }
+  return jj;
+}
+
+void from_json(const json & jj, Ldr & ldr)
+{
+  ldr._data.clear();
+  for (auto & elem : jj["data"]) {
+    Ldr::Record r = elem;
+    ldr._data.push_back(r);
+  }
+  ldr._label = jj["label"];
+  if (jj.count("shape"))
+    ldr._shape = jj["shape"].get<std::vector<int> >();
+  if (jj.count("shape_type"))
+    ldr._shape_type = (Ldr::shape_type)(int)jj["shape_type"];
+}
+
+//
+// Ldrset - convert an Ldr/Ldrset to json
+//
+json Ldrset::to_json() const
+{
+  json jj = json::array();
+  for (auto & ldr : _ldrs) {
+    json jldr = ldr.second.to_json();
+    jj.push_back(jldr);
+  }
+  if (getBlockCount()) {
+    // add a level of json array
+    jj = {jj};
+    // add the blocks as additional arrays
+    for (auto & blockp : _blocks) {
+      json jn = blockp->to_json();
+      jj.push_back(jn);
+    }
+  }
+  return jj;
+}
+
+void from_json(const json & jj, Ldrset & ldrset)
+{
+  ldrset.clear();
+  // it's an array of arrays, each sub-arrays is an Ldrset,
+  // the first block goes into ldrset, the rest added using addBlock
+  if (jj.is_array()) {
+    if (jj.size() && jj[0].is_array()) {
+      // first one is top-level
+      from_json(jj[0], ldrset);
+      for (size_t ii = 1; ii < jj.size(); ii++) {
+        // the rest are blocks
+        Ldrset * block = new Ldrset();
+        from_json(jj[ii], *block);
+        ldrset.addBlock(block);
+      }
+    }
+    else {
+      // it's a single array, each element should be an Ldr in json form
+      for (auto & el : jj) {
+        Ldr ldr;
+        from_json(el, ldr);
+        ldrset.addLdr(ldr);
+      }
+    }
+  }
+  else {
+    // something's wrong with the format of jj
+    ERROR("Unable to convert JSON to Ldrset (JCAMP-DX)\n");
+  }
+}
+
+#endif // JCAMP_TO_JSON
+
+#ifdef JCAMPDX_MAIN
+#define CXXOPTS_NO_RTTI
 #include "cxxopts.hpp"
+#include "cio.hpp"
+#ifdef CIO
+using cio::cout;
+#else
+using std::cout;
+#endif
+
 int main(int argc, char *argv[])
 {
   cxxopts::Options options(argv[0], "jcampdx data file utility");
   options.add_options()
     ("f,file",          "jcamp file to read",
-     cxxopts::value<std::vector<std::string> >()->default_value({"/dev/stdin"}))
+     cxxopts::value<std::vector<string> >()->default_value({"/dev/stdin"}))
+    ("J,jfile",         "JSON file to read",
+     cxxopts::value<std::vector<string> >()->default_value({"/dev/stdin"}))
     ("s,se",            "something else",
-     cxxopts::value<std::vector<std::string> >()->default_value({"/dev/stdin"}))
+     cxxopts::value<std::vector<string> >()->default_value({"/dev/stdin"}))
     ("h,help",          "print help message")
+    ("j,json",          "print as JSON")
     ("v,verbose",       "be verbose")
     ;
   options.parse(argc, argv);
   options.parse_positional("file");
 
   if (options.count("help")) {
-    std::cout << options.help();
+    cout << options.help();
     exit(0);
   }
 
-  for (auto & filename : options["file"].as<std::vector<std::string> >() ) {
+  for (auto & filename : options["file"].as<std::vector<string> >() ) {
     try {
       Ldrset jc(filename);
       if (DEBUG) {
-        std::cout << "done:\n";
-        std::cout << jc;
+        cout << "done:\n";
+        cout << jc;
+      }
+      if (options.count("json")) {
+        json jj = jc.to_json();
+        cout << jj.dump(2) << "\n";
       }
       return 0;
     }
     catch (const std::exception & ex) {
-      std::cerr << "failed: " << ex.what() << "\n";
+      cout << "failed: " << ex.what() << "\n";
       return -1;
     }
   }

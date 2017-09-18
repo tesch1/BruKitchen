@@ -33,9 +33,20 @@ ans =
 |[mexldr.cpp](matlab/mexldr.cpp)                     |Read a single jcamp-dx parameter file         |
 
 ## Python
+
+### Install
+Build the python modules in-place.
+
+```
+rm jcampdx.so
+python setup.py build_ext --inplace
+```
+
+### Index
 |File                           |                                                       |
 |-------------------------------|-------------------------------------------------------|
 |[BruKitchen.py](python/BruKitchen.py) |utility functions for controlling the spectrometer     |
 |[PvCmd.py](python/PvCmd.py)           |classes for wrapping control of ParaVision             |
 |[pvshell.py](python/pvshell.py)       |a command-line shell for controlling ParaVision        |
 |[procall.py](python/procall.py)       |example of how to process a series of PV experiments   |
+

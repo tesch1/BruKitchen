@@ -5,7 +5,7 @@
  * \brief       location in file, and associated exceptions
  *
  */
-
+#include <sstream>
 #include "FileLoc.hpp"
 #include "cxx_utils.hpp"
 
