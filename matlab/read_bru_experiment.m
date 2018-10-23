@@ -111,6 +111,19 @@ if exist([PathName '/1r'])
     fclose(fpim);
 end
 
+if exist([PathName '/2rr'])
+    fpre = fopen([PathName '/2rr'],'r');
+    fpim = fopen([PathName '/2ii'],'r');
+    A.spec = fread(fpre,'int32') + 1i * fread(fpim,'int32');
+    % scale the spectrum according to NC_proc (going from 32-bit int to 64-bit double anyway)
+    A.spec = A.spec .* (2^A.procs.NC_proc);
+    fclose(fpre);
+    fclose(fpim);
+    % should reshape A.spec here, but how?  maybe...?
+    warning('shape of 2D .spec might be wrong');
+    A.spec = reshape(A.spec, [], A.procs.TDeff).';
+end
+
 for FILE = {'acqus' 'procs'}
     if ~isfield(A,FILE{1}) || ~isfield(A,'DATE')
         continue
