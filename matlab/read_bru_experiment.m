@@ -24,8 +24,23 @@ end
 pdatapath = [PathName '/pdata/'];
 pdatadirs = dir(pdatapath);
 
+isOctave = exist('OCTAVE_VERSION', 'builtin') ~= 0;
+if isOctave
+    if compare_versions (version,'4.4.0','>=')
+        hasContainers = 1;
+    else
+        hasContainers = 0;
+    end
+else
+    hasContainers = 1;
+end
+
 if length(pdatadirs)
-    A.pdata = containers.Map('KeyType','int32','ValueType','any');
+    if hasContainers
+        A.pdata = containers.Map('KeyType','int32','ValueType','any');
+    else
+        A.pdata = struct();
+    end
 end
 for jj=1:length(pdatadirs)
     % 1...N
@@ -35,7 +50,11 @@ for jj=1:length(pdatadirs)
         continue;
     end
     try
-        A.pdata(pdatanum) = read_bru_experiment(procpath);
+        if hasContainers
+            A.pdata(pdatanum) = read_bru_experiment(procpath);
+        else
+            A.pdata.(num2str(pdatanum)) = read_bru_experiment(procpath);
+        end
     catch err
         disp(sprintf('couldnt read %s\n', procpath));
         err
