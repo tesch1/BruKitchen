@@ -11,6 +11,12 @@
 #include "mex.h"
 #include "jcampdx.hpp"
 
+DebugLevel g_debug_level = LEVEL_INFO2;
+void DebugFunc(DebugLevel level, string str, string location)
+{
+  mexErrMsgTxt((location + ":" + str).c_str());
+}
+
 /* paramstruct = mexLoadLDRS(filename) */
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {

@@ -29,8 +29,31 @@
 #ifndef JCAMPDX_HPP
 #define JCAMPDX_HPP
 
+#ifdef _WIN32
+char * strndup(const char *s, size_t n);
+#endif
+
+#if defined(CIO)
+#include "cio.hpp"
+#else
+#include <iostream>
+#include <sstream>
+using std::ostream;
+using std::stringstream;
+#endif
+
+#if defined(MATLAB_MEX_FILE)
+#if defined(ERROR) || defined(INFO)
+#error "header issues"
+#endif
+#define ERROR(putput) do { std::cerr << putput << "\n"; } while (0)
+#define INFO(putput) do { std::cout << putput << "\n"; } while (0)
+#else
+#include "debug.hpp"
+#endif
+
 #include <string>
-#include <deque>
+using std::string;
 #include <map>
 #include <set>
 #include <vector>
@@ -43,8 +66,13 @@ typedef double real_t;
 #endif
 #endif
 
+#ifdef JCAMP_TO_JSON
+#include "json/src/json.hpp"
+using json = nlohmann::json;
+#endif
+
 enum record_type {
-  RECORD_TEXT,
+  RECORD_TEXT = 1,
   RECORD_STRING,
   RECORD_QSTRING,
   RECORD_NUMERIC,
@@ -54,67 +82,80 @@ enum record_type {
 
 class Ldr;
 
-class Record {
-public:
-  Record();
-  Record(std::string str, bool quoted = false);
-  Record(real_t val);
-  Record(Ldr * ldr);
-
-  const real_t & num() const;
-  const std::string & str() const;
-  record_type type() const;
-  void setNum(real_t val);
-  void setStr(std::string str, bool quoted = false);
-  const Ldr & group() const;
-  void setType(record_type type);
-
-  friend std::ostream & operator <<(std::ostream & out, Record const & l);
-
-private:
-  record_type _type;
-  std::string _str;
-  real_t _num;
-  Ldr * _ldr;
-};
-
 //! string to label
-struct Label : public std::string {
-  Label(std::string name);
+struct Label : public string {
+  Label(string name);
 };
 
 class Ldr {
 public:
   Ldr();
-  Ldr(std::string label);
-  Ldr(record_type type, std::string str, std::string label = "");
-  Ldr(record_type type, real_t val, std::string label = "");
+  Ldr(const string & label);
+  Ldr(record_type type, const string & str, const string & label = "");
+  Ldr(record_type type, real_t val, const string & label = "");
 
   size_t size() const;
   std::vector<int> shape() const;
-  std::string label() const;
+  string label() const;
 
   // get values
-  const std::string & str(size_t idx = 0) const;
+  const string & str(size_t idx = 0) const;
   const real_t & num(size_t idx = 0) const;
   record_type type(size_t idx = 0) const;
-  void setStr(std::string str, size_t idx = 0);
+  void setStr(const string & str, size_t idx = 0);
   void setNum(real_t val, size_t idx = 0);
 
-  void setLabel(std::string label);
-  void setShape(std::string variable_list);
+  void setLabel(const string & label);
+  void setShape(const string & variable_list);
   void setShape(const Ldr & shape);
 
-  void appendStr(std::string str, bool quoted = false);
+  void appendStr(const string & str, bool quoted = false);
   void appendNum(real_t val);
   void appendGroup(Ldr * group);
 
-  friend std::ostream & operator <<(std::ostream & out, Ldr const & l);
+private:
+  class Record {
+  public:
+    Record();
+    Record(const string & str, bool quoted = false);
+    Record(real_t val);
+    Record(Ldr * ldr);
+
+    const real_t & num() const;
+    const string & str() const;
+    record_type type() const;
+    void setNum(real_t val);
+    void setStr(const string & str, bool quoted = false);
+    const Ldr & group() const;
+    void setType(record_type type);
+
+    friend ostream & operator <<(ostream & out, Ldr::Record const & l);
+    friend ostream & operator <<(ostream & out, Ldr const & l);
+    friend Ldr;
+#ifdef JCAMP_TO_JSON
+    json to_json() const;
+#endif
+  private:
+    record_type _type;
+    string _str;
+    real_t _num;
+    Ldr * _ldr;
+  };
+
+public:
+  friend Record;
+  friend ostream & operator <<(ostream & out, Ldr const & l);
+  friend ostream & operator <<(ostream & out, Ldr::Record const & l);
+#ifdef JCAMP_TO_JSON
+  json to_json() const;
+  friend void from_json(const json & jj, Ldr::Record & ldr);
+  friend void from_json(const json & jj, Ldr & ldr);
+#endif
 
 private:
   std::vector<Record> _data;
   //std::vector<real_t> _num; // special case -- optimize table data .. someday
-  std::string _label;
+  string _label;
   std::vector<int> _shape;
   enum shape_type { SHAPE_1D, SHAPE_2D, SHAPE_XYY, SHAPE_XYXY } _shape_type;
 };
@@ -125,45 +166,60 @@ class Ldrset
 public:
 
   Ldrset();
-  Ldrset(const std::string filename);
+  Ldrset(const string & filename);
   ~Ldrset();
 
-  void loadFile(const std::string filename);
-  void loadString(const std::string jdxstring, std::string nametag="string");
+  void loadFile(const string & filename);
+  void loadString(const string & jdxstring, const string & nametag="string");
   void clear();
   size_t size() const;
 
   //
   void addLdr(const Ldr & ldr);
-  void addLdr(const std::string label, const Ldr & ldr);
+  void addLdr(const string & label, const Ldr & ldr);
   void addBlock(Ldrset * ldrset);
-  void deleteLdr(const std::string label);
-  Ldr & getLdr(const std::string label);
+  void deleteLdr(const string & label);
+  Ldr & getLdr(const string & label);
+  const Ldr & getLdr(const string & label) const;
 
   // data retreival
-  bool labelExists(const std::string label) const;
-  std::string getString(const std::string label, size_t idx = 0) const;
-  real_t getDouble(const std::string label, size_t idx = 0) const;
+  bool labelExists(const string & label) const;
+  string getString(const string & label, size_t idx = 0) const;
+  real_t getDouble(const string & label, size_t idx = 0) const;
 
-  void newEmpty(const std::string label);
-  void setString(const std::string label, std::string str, size_t idx = 0, bool create = false);
-  void setDouble(const std::string label, real_t val, size_t idx = 0, bool create = false);
+  void newEmpty(const string & label);
+  void setString(const string & label, const string & str, size_t idx = 0, bool create = false);
+  void setDouble(const string & label, real_t val, size_t idx = 0, bool create = false);
 
   // retrieve a sub-set of LDRs in the particular block
-  Ldrset & getBlock(int blocknum);
+  std::shared_ptr<Ldrset> getBlock(int blocknum);
+  size_t getBlockCount() const;
 
-  friend std::ostream & operator <<(std::ostream & out, Ldrset const & l);
+  friend ostream & operator <<(ostream & out, Ldrset const & l);
+#ifdef JCAMP_TO_JSON
+  json to_json() const;
+#endif
 
   // stuff for the parser
   Ldrset * jcamp_topnode;
-  std::string _curfilename;
-  std::set<std::string> getLabels();
+  string _curfilename;
+  std::set<string> getLabels() const;
 
 private:
   void validate() const;
 
   std::map<Label, Ldr> _ldrs;
-  std::deque<std::shared_ptr<Ldrset> > _blocks;
+  std::vector<std::shared_ptr<Ldrset> > _blocks;
 };
+
+#ifdef JCAMP_TO_JSON
+#include "json/src/json.hpp"
+using json = nlohmann::json;
+
+// convert json into an Ldr/Ldrset
+void from_json(const json & jj, Ldr::Record & ldr);
+void from_json(const json & jj, Ldr & ldr);
+void from_json(const json & jj, Ldrset & ldrset);
+#endif // JCAMP_TO_JSON
 
 #endif // JCAMPDX_HPP

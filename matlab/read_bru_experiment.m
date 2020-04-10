@@ -11,6 +11,10 @@ jdxfiles = {'proc' 'procs' 'proc2' 'proc2s'...
 for fn=jdxfiles
     filename = [PathName '/' fn{1}];
     if exist(filename, 'file')==2
+        % matlab is stupid, this expands tildes in filenames:
+        blah = fopen(filename);
+        filename = fopen(blah);
+        fclose(blah);
         A.(fn{1}) = mexldr(filename);
         %disp(sprintf('loaded %s', filename));
     end
@@ -20,8 +24,23 @@ end
 pdatapath = [PathName '/pdata/'];
 pdatadirs = dir(pdatapath);
 
+isOctave = exist('OCTAVE_VERSION', 'builtin') ~= 0;
+if isOctave
+    if compare_versions (version,'4.4.0','>=')
+        hasContainers = 1;
+    else
+        hasContainers = 0;
+    end
+else
+    hasContainers = 1;
+end
+
 if length(pdatadirs)
-    A.pdata = containers.Map('KeyType','int32','ValueType','any');
+    if hasContainers
+        A.pdata = containers.Map('KeyType','int32','ValueType','any');
+    else
+        A.pdata = struct();
+    end
 end
 for jj=1:length(pdatadirs)
     % 1...N
@@ -31,7 +50,11 @@ for jj=1:length(pdatadirs)
         continue;
     end
     try
-        A.pdata(pdatanum) = read_bru_experiment(procpath);
+        if hasContainers
+            A.pdata(pdatanum) = read_bru_experiment(procpath);
+        else
+            A.pdata.(num2str(pdatanum)) = read_bru_experiment(procpath);
+        end
     catch err
         disp(sprintf('couldnt read %s\n', procpath));
         err
@@ -55,6 +78,12 @@ if exist([PathName '/title'])
     fclose(fp);
 end
 
+if exist([PathName '/pulseprogram'])
+    fp = fopen([PathName '/pulseprogram'],'r');
+    A.title = fread(fp, 'int8=>char')';
+    fclose(fp);
+end
+
 if exist([PathName '/ser'])
     fpre = fopen([PathName '/ser'],'r');
     A.fid = fread(fpre,'int32','l');
@@ -68,6 +97,9 @@ end
 if exist([PathName '/vdlist'])
     A.vdlist = read_bru_delaylist([PathName '/vdlist']);
 end
+if exist([PathName '/vclist'])
+    A.vclist = read_bru_delaylist([PathName '/vclist']);
+end
 
 if exist([PathName '/1r'])
     fpre = fopen([PathName '/1r'],'r');
@@ -77,6 +109,19 @@ if exist([PathName '/1r'])
     A.spec = A.spec .* (2^A.procs.NC_proc);
     fclose(fpre);
     fclose(fpim);
+end
+
+if exist([PathName '/2rr'])
+    fpre = fopen([PathName '/2rr'],'r');
+    fpim = fopen([PathName '/2ii'],'r');
+    A.spec = fread(fpre,'int32') + 1i * fread(fpim,'int32');
+    % scale the spectrum according to NC_proc (going from 32-bit int to 64-bit double anyway)
+    A.spec = A.spec .* (2^A.procs.NC_proc);
+    fclose(fpre);
+    fclose(fpim);
+    % should reshape A.spec here, but how?  maybe...?
+    warning('shape of 2D .spec might be wrong');
+    A.spec = reshape(A.spec, [], A.procs.TDeff).';
 end
 
 for FILE = {'acqus' 'procs'}
