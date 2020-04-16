@@ -10,6 +10,7 @@
 //#include "premexh.h"
 #include "mex.h"
 #include "jcampdx.hpp"
+#include "debug.hpp"
 
 DebugLevel g_debug_level = LEVEL_INFO2;
 void DebugFunc(DebugLevel level, string str, string location)

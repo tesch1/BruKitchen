@@ -6,7 +6,7 @@ function A = read_bru_experiment(PathName)
 %% read various parameter files
 jdxfiles = {'proc' 'procs' 'proc2' 'proc2s'...
             'acqu' 'acqus' 'acqu2' 'acqu2s'...
-            'acqp' 'method' 'scon2'};
+            'acqp' 'method' 'scon2' 'visu_pars'};
 
 for fn=jdxfiles
     filename = [PathName '/' fn{1}];
